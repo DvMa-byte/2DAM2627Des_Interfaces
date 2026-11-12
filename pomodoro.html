@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -71,11 +71,6 @@
                     <span id="ambient-active-dot" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500"></span>
                 </button>
 
-                <!-- Zen Mode Button -->
-                <button id="enter-zen-btn" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" title="Modo Zen (Sin Distracciones)">
-                    <i class="ph-bold ph-corners-out text-lg"></i>
-                </button>
-
                 <!-- Sound Toggle -->
                 <button id="toggle-sound-btn" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                     <i id="sound-icon" class="ph-bold ph-speaker-high text-lg"></i>
@@ -93,12 +88,6 @@
             </div>
         </div>
     </header>
-
-    <!-- Exit Zen Button (Floating when in Zen Mode) -->
-    <button id="zen-exit-btn" class="hidden fixed top-6 right-6 z-50 px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold text-xs shadow-2xl items-center gap-2 hover:opacity-90 transition-all">
-        <i class="ph-bold ph-corners-in text-base"></i>
-        <span data-i18n="exitZen">Salir del Modo Zen</span>
-    </button>
 
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -258,7 +247,6 @@
                     <button data-tab="stats" class="sidebar-tab-btn flex-1 py-2 rounded-xl bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white" data-i18n="tabStats">Stats</button>
                     <button data-tab="calendar" class="sidebar-tab-btn flex-1 py-2 rounded-xl text-slate-500 dark:text-slate-400" data-i18n="tabCalendar">Agenda</button>
                     <button data-tab="goals" class="sidebar-tab-btn flex-1 py-2 rounded-xl text-slate-500 dark:text-slate-400" data-i18n="tabGoals">Metas</button>
-                    <button data-tab="notes" class="sidebar-tab-btn flex-1 py-2 rounded-xl text-slate-500 dark:text-slate-400" data-i18n="tabNotes">Notas</button>
                 </div>
 
                 <!-- TAB 1: STATS -->
@@ -306,15 +294,28 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: CALENDAR HEATMAP -->
+                <!-- TAB 2: AGENDA (TEXT NOTES MANAGER) -->
                 <div id="tab-pane-calendar" class="tab-pane hidden flex flex-col gap-3">
-                    <div class="flex items-center justify-between text-xs font-bold">
-                        <button id="cal-prev-month" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="ph-bold ph-caret-left"></i></button>
-                        <span id="calendar-month-year" class="text-slate-800 dark:text-slate-100">--</span>
-                        <button id="cal-next-month" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="ph-bold ph-caret-right"></i></button>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="agendaTitle">Agenda de Textos</span>
+                        <span id="agenda-save-status" class="text-[10px] font-bold text-emerald-500 opacity-0 transition-opacity" data-i18n="saved">Guardado</span>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs">
-                        <!-- Days injected dynamically -->
+                    <!-- Formulario para añadir/editar texto -->
+                    <form id="agenda-form" class="flex flex-col gap-2">
+                        <input type="hidden" id="agenda-edit-id" value="">
+                        <input type="text" id="agenda-title-input" placeholder="Título del texto o nota..." class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:border-rose-500" required>
+                        <textarea id="agenda-content-input" placeholder="Escribe tu contenido aquí..." class="w-full h-32 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-3 text-xs sm:text-sm outline-none focus:border-rose-500 transition-colors resize-none" required></textarea>
+                        <div class="flex gap-2">
+                            <button type="submit" id="agenda-submit-btn" class="flex-1 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-xs hover:bg-rose-600 transition-colors" data-i18n="saveText">Guardar Texto</button>
+                            <button type="button" id="agenda-cancel-btn" class="hidden px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 font-bold text-xs hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors" data-i18n="cancel">Cancelar</button>
+                        </div>
+                    </form>
+                    <!-- Listado de textos guardados -->
+                    <div class="flex flex-col gap-2 mt-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400" data-i18n="savedTexts">Textos Guardados</span>
+                        <ul id="agenda-texts-list" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                            <!-- Injected dynamically via JS -->
+                        </ul>
                     </div>
                 </div>
 
@@ -446,6 +447,59 @@
         </div>
     </div>
 
+    <!-- FOCUS WARNING MODAL (ON FAST SKIP) -->
+    <div id="focus-warning-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col items-center text-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl font-bold">
+                <i class="ph-bold ph-warning"></i>
+            </div>
+            <div class="flex flex-col gap-1">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white">¡Atención!</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300">Has pasado de sesión muy rápido. ¿Estás realmente centrado y enfocado en tu objetivo?</p>
+            </div>
+            <div class="flex gap-2 w-full mt-2">
+                <button id="focus-warning-yes" class="flex-1 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-xs hover:bg-rose-600 transition-colors">Sí, estoy enfocado</button>
+                <button id="focus-warning-no" class="flex-1 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">No mucho</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDY MOTIVATION TIPS MODAL (SHOWN ON "NO MUCHO") -->
+    <div id="study-motivation-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="ph-bold ph-sparkle text-amber-500 text-xl"></i>
+                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white">¡Tómate un respiro y mira lo positivo! ✨</h3>
+                </div>
+                <button id="close-motivation-btn" class="p-1 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 flex flex-col gap-3 font-medium">
+                <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-200">
+                    🌱 <strong>¡No pasa nada!</strong> Si necesitas despejarte, tómate unos minutos para respirar hondo, estirar o tomar agua. 
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                    Recuerda que si te centras y estudias bien ahora:
+                </p>
+                <ul class="flex flex-col gap-2 pl-1">
+                    <li class="flex items-start gap-2">
+                        <span class="text-rose-500 font-bold">🌟</span>
+                        <span><strong>Terminarás mucho antes:</strong> Tendrás el resto del día totalmente libre y sin cargas mentales.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-rose-500 font-bold">🧠</span>
+                        <span><strong>Aprenderás sin esfuerzo:</strong> La concentración profunda fija los conocimientos en tu memoria a largo plazo.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-rose-500 font-bold">🏆</span>
+                        <span><strong>Sentirás una gran satisfacción:</strong> Verás cómo tu racha crece y tus metas se cumplen con éxito.</span>
+                    </li>
+                </ul>
+            </div>
+            <button id="motivation-got-it-btn" class="w-full py-3 rounded-2xl bg-rose-500 text-white font-bold text-xs sm:text-sm hover:bg-rose-600 transition-colors mt-2">¡Me tomo un respiro y vuelvo con energía! 💪</button>
+        </div>
+    </div>
+
     <!-- MANAGING SUBJECTS MODAL -->
     <div id="subjects-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-5">
@@ -496,8 +550,6 @@
                 tagline: "Organizador de Enfoque",
                 daySingular: "día",
                 daysShort: "días",
-                exitZen: "Salir del Modo Zen",
-                zenMode: "Zen",
                 ambientTitle: "Sonidos Ambientales",
                 rain: "Lluvia",
                 ocean: "Olas del Mar",
@@ -533,7 +585,6 @@
                 tabStats: "Stats",
                 tabCalendar: "Agenda",
                 tabGoals: "Metas",
-                tabNotes: "Notas",
                 today: "Hoy",
                 thisWeek: "Esta Semana",
                 streakMax: "Mejor Racha",
@@ -547,8 +598,9 @@
                 dailyGoal: "Meta Diaria",
                 weeklyGoal: "Meta Semanal",
                 badgesTitle: "Logros e Insignias",
-                notesTitle: "Bloc de Notas Rápido",
-                notesPlaceholder: "Escribe aquí ideas rápidas, dudas o apuntes...",
+                agendaTitle: "Agenda de Textos",
+                saveText: "Guardar Texto",
+                savedTexts: "Textos Guardados",
                 saved: "Guardado",
                 settingsTitle: "Configuración de Tiempos",
                 timerDurations: "Duraciones del Temporizador (minutos)",
@@ -571,15 +623,12 @@
                 badgeGoalKeeperDesc: "Alcanza tu meta diaria",
                 badgeMaster: "Máster del Enfoque",
                 badgeMasterDesc: "Acumula 50 Pomodoros en total",
-                badgeNotes: "Mente Organizada",
-                badgeNotesDesc: "Escribe tus primeras notas"
+                noAgendaTexts: "No hay textos guardados"
             },
             en: {
                 tagline: "Focus Organizer",
                 daySingular: "day",
                 daysShort: "days",
-                exitZen: "Exit Zen Mode",
-                zenMode: "Zen",
                 ambientTitle: "Ambient Sounds",
                 rain: "Rain",
                 ocean: "Ocean Waves",
@@ -613,9 +662,8 @@
                 subjReading: "Reading",
                 subjWork: "Work",
                 tabStats: "Stats",
-                tabCalendar: "Calendar",
+                tabCalendar: "Agenda",
                 tabGoals: "Goals",
-                tabNotes: "Notes",
                 today: "Today",
                 thisWeek: "This Week",
                 streakMax: "Best Streak",
@@ -629,8 +677,9 @@
                 dailyGoal: "Daily Goal",
                 weeklyGoal: "Weekly Goal",
                 badgesTitle: "Achievements & Badges",
-                notesTitle: "Quick Notepad",
-                notesPlaceholder: "Type quick notes, ideas, or reminders here...",
+                agendaTitle: "Text Agenda",
+                saveText: "Save Text",
+                savedTexts: "Saved Texts",
                 saved: "Saved",
                 settingsTitle: "Timer Settings",
                 timerDurations: "Timer Durations (minutes)",
@@ -653,15 +702,12 @@
                 badgeGoalKeeperDesc: "Reach your daily goal",
                 badgeMaster: "Focus Master",
                 badgeMasterDesc: "Accumulate 50 total Pomodoros",
-                badgeNotes: "Organized Mind",
-                badgeNotesDesc: "Write your first quick notes"
+                noAgendaTexts: "No saved texts"
             },
             fr: {
                 tagline: "Organisateur de Focus",
                 daySingular: "jour",
                 daysShort: "jours",
-                exitZen: "Quitter le Mode Zen",
-                zenMode: "Zen",
                 ambientTitle: "Sons Ambiants",
                 rain: "Pluie",
                 ocean: "Vagues de la Mer",
@@ -697,7 +743,6 @@
                 tabStats: "Stats",
                 tabCalendar: "Agenda",
                 tabGoals: "Objectifs",
-                tabNotes: "Notes",
                 today: "Aujourd'hui",
                 thisWeek: "Semaine",
                 streakMax: "Meilleure Série",
@@ -711,11 +756,12 @@
                 dailyGoal: "Objectif Quotidien",
                 weeklyGoal: "Objectif Hebdomadaire",
                 badgesTitle: "Badges et Succès",
-                notesTitle: "Bloc-notes Rapide",
-                notesPlaceholder: "Écrivez ici vos idées ou notes...",
+                agendaTitle: "Agenda de Textes",
+                saveText: "Enregistrer le Texte",
+                savedTexts: "Textes Enregistrés",
                 saved: "Enregistré",
-                settingsTitle: "Réglages de Durée",
-                timerDurations: "Durées du Minuteur (minutes)",
+                settingsTitle: "Réglages",
+                timerDurations: "Durées (minutes)",
                 goalsConfig: "Objectifs (Pomodoros)",
                 autoStartBreaks: "Démarrer automatiquement les pauses",
                 autoStartWork: "Démarrer automatiquement les pomodoros",
@@ -735,15 +781,12 @@
                 badgeGoalKeeperDesc: "Atteignez votre objectif quotidien",
                 badgeMaster: "Maître du Focus",
                 badgeMasterDesc: "Accumulez 50 Pomodoros au total",
-                badgeNotes: "Esprit Organisé",
-                badgeNotesDesc: "Écrivez vos premières notes"
+                noAgendaTexts: "Aucun texte enregistré"
             },
             de: {
                 tagline: "Fokus-Organisator",
                 daySingular: "Tag",
                 daysShort: "Tage",
-                exitZen: "Zen-Modus Beenden",
-                zenMode: "Zen",
                 ambientTitle: "Umgebungsgeräusche",
                 rain: "Regen",
                 ocean: "Meereswellen",
@@ -777,9 +820,8 @@
                 subjReading: "Lesen",
                 subjWork: "Arbeit",
                 tabStats: "Statistik",
-                tabCalendar: "Kalender",
+                tabCalendar: "Agenda",
                 tabGoals: "Ziele",
-                tabNotes: "Notizen",
                 today: "Heute",
                 thisWeek: "Woche",
                 streakMax: "Beste Serie",
@@ -793,12 +835,13 @@
                 dailyGoal: "Tagesziel",
                 weeklyGoal: "Wochenziel",
                 badgesTitle: "Erfolge & Abzeichen",
-                notesTitle: "Schnellnotizen",
-                notesPlaceholder: "Schreibe hier kurze Gedanken auf...",
+                agendaTitle: "Text-Agenda",
+                saveText: "Text Speichern",
+                savedTexts: "Gespeicherte Texte",
                 saved: "Gespeichert",
-                settingsTitle: "Timer-Einstellungen",
-                timerDurations: "Timer-Dauer (Minuten)",
-                goalsConfig: "Fokus-Ziele (Pomodoros)",
+                settingsTitle: "Einstellungen",
+                timerDurations: "Timer-Dauer",
+                goalsConfig: "Ziele",
                 autoStartBreaks: "Pausen automatisch starten",
                 autoStartWork: "Pomodoros automatisch starten",
                 saveChanges: "Speichern",
@@ -817,15 +860,12 @@
                 badgeGoalKeeperDesc: "Erreiche dein Tagesziel",
                 badgeMaster: "Fokus-Meister",
                 badgeMasterDesc: "Sammle insgesamt 50 Pomodoros",
-                badgeNotes: "Organisierter Geist",
-                badgeNotesDesc: "Schreibe deine ersten Notizen"
+                noAgendaTexts: "Keine gespeicherten Texte"
             },
             it: {
                 tagline: "Organizzatore di Focus",
                 daySingular: "giorno",
                 daysShort: "giorni",
-                exitZen: "Esci da Modalità Zen",
-                zenMode: "Zen",
                 ambientTitle: "Suoni Ambientali",
                 rain: "Pioggia",
                 ocean: "Onde del Mare",
@@ -861,7 +901,6 @@
                 tabStats: "Statistiche",
                 tabCalendar: "Agenda",
                 tabGoals: "Obiettivi",
-                tabNotes: "Note",
                 today: "Oggi",
                 thisWeek: "Settimana",
                 streakMax: "Miglior Serie",
@@ -875,15 +914,16 @@
                 dailyGoal: "Obiettivo Giornaliero",
                 weeklyGoal: "Obiettivo Settimanale",
                 badgesTitle: "Distintivi e Successi",
-                notesTitle: "Blocco Note Rapido",
-                notesPlaceholder: "Scrivi qui idee rapide o appunti...",
+                agendaTitle: "Agenda Testi",
+                saveText: "Salva Testo",
+                savedTexts: "Testi Salvati",
                 saved: "Salvato",
-                settingsTitle: "Impostazioni Timer",
-                timerDurations: "Durata Timer (minuti)",
-                goalsConfig: "Obiettivi (Pomodoros)",
+                settingsTitle: "Impostazioni",
+                timerDurations: "Durata Timer",
+                goalsConfig: "Obiettivi",
                 autoStartBreaks: "Avvia pause automaticamente",
                 autoStartWork: "Avvia pomodoros automaticamente",
-                saveChanges: "Salva Modifiche",
+                saveChanges: "Salva",
                 allSubjects: "Tutte",
                 noTasks: "Nessuna attività registrata",
                 badgeUnlocked: "Distintivo Sbloccato!",
@@ -899,15 +939,12 @@
                 badgeGoalKeeperDesc: "Raggiungi il tuo obiettivo giornaliero",
                 badgeMaster: "Maestro del Focus",
                 badgeMasterDesc: "Accumula 50 Pomodoro totali",
-                badgeNotes: "Mente Organizzata",
-                badgeNotesDesc: "Scrivi le tue prime note"
+                noAgendaTexts: "Nessun testo salvato"
             },
             pt: {
                 tagline: "Organizador de Foco",
                 daySingular: "dia",
                 daysShort: "dias",
-                exitZen: "Sair do Modo Zen",
-                zenMode: "Zen",
                 ambientTitle: "Sons Ambientais",
                 rain: "Chuva",
                 ocean: "Olas do Mar",
@@ -943,7 +980,6 @@
                 tabStats: "Estatísticas",
                 tabCalendar: "Agenda",
                 tabGoals: "Metas",
-                tabNotes: "Notas",
                 today: "Hoje",
                 thisWeek: "Semana",
                 streakMax: "Melhor Sequência",
@@ -957,15 +993,16 @@
                 dailyGoal: "Meta Diária",
                 weeklyGoal: "Meta Semanal",
                 badgesTitle: "Conquistas e Emblemas",
-                notesTitle: "Bloco de Notas Rápido",
-                notesPlaceholder: "Escreva aqui ideias ou lembretes...",
+                agendaTitle: "Agenda de Textos",
+                saveText: "Guardar Texto",
+                savedTexts: "Textos Guardados",
                 saved: "Guardado",
                 settingsTitle: "Configurações",
-                timerDurations: "Durações do Temporizador (minutos)",
-                goalsConfig: "Metas de Foco (Pomodoros)",
+                timerDurations: "Durações",
+                goalsConfig: "Metas",
                 autoStartBreaks: "Iniciar pausas automaticamente",
                 autoStartWork: "Iniciar pomodoros automaticamente",
-                saveChanges: "Guardar Alterações",
+                saveChanges: "Guardar",
                 allSubjects: "Todas",
                 noTasks: "Nenhuma tarefa registada",
                 badgeUnlocked: "Emblema Desbloqueado!",
@@ -980,15 +1017,20 @@
                 badgeGoalKeeper: "Superação Diária",
                 badgeGoalKeeperDesc: "Alcance a sua meta diária",
                 badgeMaster: "Mestre do Foco",
-                badgeMasterDesc: "Acumule 50 Pomodoros no total",
-                badgeNotes: "Mente Organizada",
-                badgeNotesDesc: "Escreva as suas primeiras notas"
+                badgeMasterDesc: "Acumula 50 Pomodoros no total",
+                noAgendaTexts: "Sem textos guardados"
             }
         };
 
         /* ==========================================================================
            2. DEFAULT SUBJECTS & EMOJI PALETTE
            ========================================================================== */
+        const MODE_COLORS = {
+            work: { stroke: 'stroke-rose-500', text: 'text-rose-500', title: 'TIEMPO DE ENFOQUE' },
+            shortBreak: { stroke: 'stroke-emerald-500', text: 'text-emerald-500', title: 'DESCANSO CORTO' },
+            longBreak: { stroke: 'stroke-sky-500', text: 'text-sky-500', title: 'DESCANSO LARGO' }
+        };
+
         const DEFAULT_SUBJECTS = [
             { id: 'General', emoji: '🏷️', nameKey: 'subjGeneral', name: 'General' },
             { id: 'Math', emoji: '📐', nameKey: 'subjMath', name: 'Matemáticas' },
@@ -1042,7 +1084,7 @@
             tasks: [],
             history: [],
             unlockedBadges: [],
-            notes: ''
+            agendaTexts: []
         };
 
         let state = JSON.parse(localStorage.getItem('focuspulse_data')) || DEFAULT_STATE;
@@ -1059,15 +1101,107 @@
         let currentTipIndex = 0;
         let audioCtx = null;
         let ambientAudioNodes = {};
-
-        const MODE_COLORS = {
-            work: { stroke: 'stroke-rose-500', text: 'text-rose-500', bgIcon: 'bg-rose-500', shadowIcon: 'shadow-rose-500/30', btnBg: 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/30', title: 'TIEMPO DE ENFOQUE' },
-            shortBreak: { stroke: 'stroke-emerald-500', text: 'text-emerald-500', bgIcon: 'bg-emerald-500', shadowIcon: 'shadow-emerald-500/30', btnBg: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30', title: 'DESCANSO CORTO' },
-            longBreak: { stroke: 'stroke-purple-500', text: 'text-purple-500', bgIcon: 'bg-purple-500', shadowIcon: 'shadow-purple-500/30', btnBg: 'bg-purple-500 hover:bg-purple-600 shadow-purple-500/30', title: 'DESCANSO LARGO' }
-        };
+        let lastSkipTimestamp = 0;
+        let skipCountInShortTime = 0;
 
         /* ==========================================================================
-           5. DOM REFERENCES & HELPERS
+           5. AUDIO & NOTIFICATION ENGINE
+           ========================================================================== */
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioCtx = new AudioCtx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playNotificationSound() {
+            if (!state.settings.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const now = ctx.currentTime;
+                // Friendly multi-tone chime (C5 -> E5 -> G5)
+                [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+                    gain.gain.setValueAtTime(0.3, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.35);
+                });
+            } catch (e) {
+                console.warn('Audio playback not permitted or supported:', e);
+            }
+        }
+
+        function toggleAmbientSound(soundType) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                if (ambientAudioNodes[soundType]) {
+                    ambientAudioNodes[soundType].stop();
+                    delete ambientAudioNodes[soundType];
+                } else {
+                    // Synthesize soft ambient noise / tone loop
+                    const bufferSize = ctx.sampleRate * 2;
+                    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = (Math.random() * 2 - 1) * 0.05;
+                    }
+
+                    const whiteNoise = ctx.createBufferSource();
+                    whiteNoise.buffer = noiseBuffer;
+                    whiteNoise.loop = true;
+
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = soundType === 'rain' ? 'lowpass' : 'bandpass';
+                    filter.frequency.setValueAtTime(soundType === 'rain' ? 800 : 400, ctx.currentTime);
+
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+
+                    whiteNoise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    whiteNoise.start();
+                    ambientAudioNodes[soundType] = whiteNoise;
+                }
+
+                if (Object.keys(ambientAudioNodes).length > 0) {
+                    DOM.ambientActiveDot.classList.remove('hidden');
+                } else {
+                    DOM.ambientActiveDot.classList.add('hidden');
+                }
+            } catch (e) {
+                console.warn('Ambient sound playback error:', e);
+            }
+        }
+
+        function showRandomBreakTip() {
+            currentTipIndex = (currentTipIndex + 1) % REST_TIPS.length;
+            const tip = REST_TIPS[currentTipIndex];
+            DOM.tipDoText.textContent = `💡 ${tip.do}`;
+            DOM.tipDontText.textContent = `⚠️ ${tip.dont}`;
+        }
+
+        /* ==========================================================================
+           6. DOM REFERENCES & HELPERS
            ========================================================================== */
         const DOM = {
             timerDisplay: document.getElementById('timer-display'),
@@ -1098,8 +1232,6 @@
             ambientPanel: document.getElementById('ambient-panel'),
             closeAmbientBtn: document.getElementById('close-ambient-btn'),
             ambientActiveDot: document.getElementById('ambient-active-dot'),
-            enterZenBtn: document.getElementById('enter-zen-btn'),
-            zenExitBtn: document.getElementById('zen-exit-btn'),
             openGuideBtn: document.getElementById('open-guide-btn'),
             closeGuideBtn: document.getElementById('close-guide-btn'),
             guideModal: document.getElementById('guide-modal'),
@@ -1107,6 +1239,9 @@
             closeSettingsBtn: document.getElementById('close-settings-btn'),
             settingsModal: document.getElementById('settings-modal'),
             saveSettingsBtn: document.getElementById('save-settings-btn'),
+            focusWarningModal: document.getElementById('focus-warning-modal'),
+            focusWarningYes: document.getElementById('focus-warning-yes'),
+            focusWarningNo: document.getElementById('focus-warning-no'),
             addTaskForm: document.getElementById('add-task-form'),
             taskInput: document.getElementById('task-input'),
             taskSubjectSelect: document.getElementById('task-subject-select'),
@@ -1131,17 +1266,19 @@
             statsChartCanvas: document.getElementById('stats-chart'),
             chartPeriodBtns: document.querySelectorAll('.chart-period-btn'),
             historyList: document.getElementById('history-list'),
-            calendarMonthYear: document.getElementById('calendar-month-year'),
-            calendarGrid: document.getElementById('calendar-grid'),
-            calPrevMonth: document.getElementById('cal-prev-month'),
-            calNextMonth: document.getElementById('cal-next-month'),
             dailyGoalText: document.getElementById('daily-goal-text'),
             dailyGoalBar: document.getElementById('daily-goal-bar'),
             weeklyGoalText: document.getElementById('weekly-goal-text'),
             weeklyGoalBar: document.getElementById('weekly-goal-bar'),
             badgesGrid: document.getElementById('badges-grid'),
-            notesTextarea: document.getElementById('notes-textarea'),
-            notesSaveStatus: document.getElementById('notes-save-status')
+            agendaForm: document.getElementById('agenda-form'),
+            agendaEditId: document.getElementById('agenda-edit-id'),
+            agendaTitleInput: document.getElementById('agenda-title-input'),
+            agendaContentInput: document.getElementById('agenda-content-input'),
+            agendaSubmitBtn: document.getElementById('agenda-submit-btn'),
+            agendaCancelBtn: document.getElementById('agenda-cancel-btn'),
+            agendaTextsList: document.getElementById('agenda-texts-list'),
+            agendaSaveStatus: document.getElementById('agenda-save-status')
         };
 
         function saveData() {
@@ -1474,6 +1611,22 @@
             updateDisplay();
         }
 
+        function handleSkipClick() {
+            const now = Date.now();
+            // Si el usuario hace clic en saltar en menos de 4 segundos de diferencia
+            if (now - lastSkipTimestamp < 4000) {
+                skipCountInShortTime++;
+                if (skipCountInShortTime >= 2) {
+                    DOM.focusWarningModal.classList.remove('hidden');
+                    return;
+                }
+            } else {
+                skipCountInShortTime = 1;
+            }
+            lastSkipTimestamp = now;
+            completeSession();
+        }
+
         function completeSession() {
             pauseTimer();
             playNotificationSound();
@@ -1541,91 +1694,21 @@
                 state.streak.max = state.streak.count;
             }
 
+            const t = TRANSLATIONS[state.settings.lang] || TRANSLATIONS.es;
             DOM.streakHeaderCount.textContent = state.streak.count;
-        }
-
-        function showRandomBreakTip() {
-            currentTipIndex = Math.floor(Math.random() * REST_TIPS.length);
-            const tip = REST_TIPS[currentTipIndex];
-            DOM.tipDoText.textContent = `💡 ${tip.do}`;
-            DOM.tipDontText.textContent = `⚠️ ${tip.dont}`;
-        }
-
-        /* ==========================================================================
-           9. SYNTHETIC AUDIO & AMBIENT NOISE ENGINE (Web Audio API)
-           ========================================================================== */
-        function initAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playNotificationSound() {
-            if (!state.settings.soundEnabled) return;
-            initAudioContext();
-
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-            osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.3); // E5
-
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
-        }
-
-        function toggleAmbientSound(soundType) {
-            initAudioContext();
-            
-            if (ambientAudioNodes[soundType]) {
-                ambientAudioNodes[soundType].stop();
-                delete ambientAudioNodes[soundType];
-            } else {
-                const bufferSize = audioCtx.sampleRate * 2;
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-                noise.loop = true;
-
-                const gain = audioCtx.createGain();
-                gain.gain.value = 0.05;
-
-                noise.connect(gain);
-                gain.connect(audioCtx.destination);
-                noise.start();
-
-                ambientAudioNodes[soundType] = noise;
-            }
-
-            const activeCount = Object.keys(ambientAudioNodes).length;
-            if (activeCount > 0) {
-                DOM.ambientActiveDot.classList.remove('hidden');
-            } else {
-                DOM.ambientActiveDot.classList.add('hidden');
-            }
+            DOM.streakHeaderLabel.textContent = state.streak.count === 1 ? t.daySingular : t.daysShort;
         }
 
         /* ==========================================================================
            10. STATS, CANVAS CHARTS, GOALS & BADGES ENGINE
            ========================================================================== */
         function renderStatsAndHistory() {
+            const t = TRANSLATIONS[state.settings.lang] || TRANSLATIONS.es;
             DOM.statToday.textContent = `${state.stats.today} min`;
             DOM.statTotal.textContent = `${state.stats.total} pomos`;
-            DOM.statMaxStreak.textContent = `${state.streak.max} ${TRANSLATIONS[state.settings.lang].daysShort}`;
+            DOM.statMaxStreak.textContent = `${state.streak.max} ${state.streak.max === 1 ? t.daySingular : t.daysShort}`;
             DOM.streakHeaderCount.textContent = state.streak.count;
+            DOM.streakHeaderLabel.textContent = state.streak.count === 1 ? t.daySingular : t.daysShort;
 
             DOM.historyList.innerHTML = '';
             if (state.history.length === 0) {
@@ -1650,34 +1733,50 @@
 
         function drawStatsChart() {
             const canvas = DOM.statsChartCanvas;
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            canvas.width = canvas.parentElement.clientWidth || 300;
+            canvas.height = canvas.parentElement.clientHeight || 150;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-            const values = [25, 50, 75, 40, 90, 60, state.stats.today];
-            const maxVal = Math.max(...values, 100);
+            let labels = [];
+            let values = [];
 
-            const barWidth = 16;
-            const gap = (canvas.width - (values.length * barWidth)) / (values.length + 1);
+            if (currentChartPeriod === 'day') {
+                labels = ['06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
+                values = [0, 25, 50, 25, 50, state.stats.today];
+            } else if (currentChartPeriod === 'week') {
+                labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+                values = [25, 50, 75, 40, 90, 60, state.stats.today];
+            } else if (currentChartPeriod === 'month') {
+                labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+                values = [250, 320, 410, state.stats.today + 150];
+            }
+
+            const maxVal = Math.max(...values, 100);
+            const barWidth = Math.max(12, Math.floor((canvas.width / labels.length) * 0.4));
+            const gap = (canvas.width - (labels.length * barWidth)) / (labels.length + 1);
 
             values.forEach((val, i) => {
                 const x = gap + i * (barWidth + gap);
-                const barHeight = (val / maxVal) * (canvas.height - 30);
+                const barHeight = Math.max(4, (val / maxVal) * (canvas.height - 30));
                 const y = canvas.height - barHeight - 20;
 
                 ctx.fillStyle = i === values.length - 1 ? '#f43f5e' : '#cbd5e1';
                 ctx.beginPath();
-                ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0]);
+                if (ctx.roundRect) {
+                    ctx.roundRect(x, y, barWidth, barHeight, [4, 4, 0, 0]);
+                } else {
+                    ctx.rect(x, y, barWidth, barHeight);
+                }
                 ctx.fill();
 
                 ctx.fillStyle = '#94a3b8';
-                ctx.font = '10px Inter';
+                ctx.font = '10px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(days[i], x + barWidth / 2, canvas.height - 5);
+                ctx.fillText(labels[i], x + barWidth / 2, canvas.height - 5);
             });
         }
 
@@ -1726,6 +1825,56 @@
         }
 
         /* ==========================================================================
+           10. AGENDA TEXTS MANAGER ENGINE
+           ========================================================================== */
+        function renderAgendaTexts() {
+            if (!DOM.agendaTextsList) return;
+            DOM.agendaTextsList.innerHTML = '';
+            
+            if (!state.agendaTexts || state.agendaTexts.length === 0) {
+                DOM.agendaTextsList.innerHTML = `<li class="text-center py-4 text-slate-400 text-xs font-medium" data-i18n="noAgendaTexts">No hay textos guardados</li>`;
+                return;
+            }
+
+            state.agendaTexts.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 flex flex-col gap-1.5';
+                li.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-800 dark:text-slate-100 text-xs">${escapeHtml(item.title)}</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="editAgendaText(${item.id})" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white transition-all text-xs" title="Editar">
+                                <i class="ph-bold ph-pencil"></i>
+                            </button>
+                            <button onclick="deleteAgendaText(${item.id})" class="p-1.5 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 hover:bg-rose-500 hover:text-white transition-all text-xs" title="Borrar">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-wrap">${escapeHtml(item.content)}</p>
+                `;
+                DOM.agendaTextsList.appendChild(li);
+            });
+        }
+
+        window.editAgendaText = function(id) {
+            const item = state.agendaTexts.find(i => i.id === id);
+            if (!item) return;
+            DOM.agendaEditId.value = item.id;
+            DOM.agendaTitleInput.value = item.title;
+            DOM.agendaContentInput.value = item.content;
+            DOM.agendaSubmitBtn.textContent = "Actualizar Texto";
+            DOM.agendaCancelBtn.classList.remove('hidden');
+            DOM.agendaTitleInput.focus();
+        };
+
+        window.deleteAgendaText = function(id) {
+            state.agendaTexts = state.agendaTexts.filter(i => i.id !== id);
+            saveData();
+            renderAgendaTexts();
+        };
+
+        /* ==========================================================================
            11. EVENT LISTENERS & INITIALIZATION
            ========================================================================== */
         function applyLanguage(lang) {
@@ -1745,6 +1894,7 @@
             saveData();
             renderTasks();
             renderGoalsAndBadges();
+            renderAgendaTexts();
             switchMode(state.mode);
         }
 
@@ -1752,11 +1902,29 @@
             DOM.langSelect.value = state.settings.lang;
             applyLanguage(state.settings.lang);
 
-            DOM.notesTextarea.value = state.notes || '';
-
             DOM.startBtn.addEventListener('click', toggleTimer);
             DOM.resetBtn.addEventListener('click', resetTimer);
-            DOM.skipBtn.addEventListener('click', completeSession);
+            DOM.skipBtn.addEventListener('click', handleSkipClick);
+
+            DOM.focusWarningYes.addEventListener('click', () => {
+                DOM.focusWarningModal.classList.add('hidden');
+                skipCountInShortTime = 0;
+                completeSession();
+            });
+
+            DOM.focusWarningNo.addEventListener('click', () => {
+                DOM.focusWarningModal.classList.add('hidden');
+                skipCountInShortTime = 0;
+                document.getElementById('study-motivation-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('close-motivation-btn').addEventListener('click', () => {
+                document.getElementById('study-motivation-modal').classList.add('hidden');
+            });
+
+            document.getElementById('motivation-got-it-btn').addEventListener('click', () => {
+                document.getElementById('study-motivation-modal').classList.add('hidden');
+            });
 
             DOM.modeBtns.forEach(btn => {
                 btn.addEventListener('click', () => switchMode(btn.getAttribute('data-mode')));
@@ -1776,7 +1944,12 @@
                 saveData();
             });
 
-            DOM.toggleAmbientBtn.addEventListener('click', () => DOM.ambientPanel.classList.toggle('hidden'));
+            DOM.toggleAmbientBtn.addEventListener('click', () => {
+                DOM.ambientPanel.classList.toggle('hidden');
+                if (!DOM.ambientPanel.classList.contains('hidden')) {
+                    DOM.ambientPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
             DOM.closeAmbientBtn.addEventListener('click', () => DOM.ambientPanel.classList.add('hidden'));
 
             document.querySelectorAll('.ambient-sound-btn').forEach(btn => {
@@ -1786,18 +1959,6 @@
                     btn.classList.toggle('bg-emerald-500/10');
                     btn.classList.toggle('border-emerald-500');
                 });
-            });
-
-            DOM.enterZenBtn.addEventListener('click', () => {
-                document.body.classList.add('zen-mode');
-                DOM.zenExitBtn.classList.remove('hidden');
-                DOM.zenExitBtn.classList.add('flex');
-            });
-
-            DOM.zenExitBtn.addEventListener('click', () => {
-                document.body.classList.remove('zen-mode');
-                DOM.zenExitBtn.classList.add('hidden');
-                DOM.zenExitBtn.classList.remove('flex');
             });
 
             DOM.openGuideBtn.addEventListener('click', () => DOM.guideModal.classList.remove('hidden'));
@@ -1880,6 +2041,62 @@
                 DOM.taskInput.value = '';
             });
 
+            // Agenda Form submission listener
+            DOM.agendaForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = DOM.agendaTitleInput.value.trim();
+                const content = DOM.agendaContentInput.value.trim();
+                const editId = DOM.agendaEditId.value;
+
+                if (!title || !content) return;
+
+                if (editId) {
+                    const item = state.agendaTexts.find(i => i.id == editId);
+                    if (item) {
+                        item.title = title;
+                        item.content = content;
+                    }
+                } else {
+                    if (!state.agendaTexts) state.agendaTexts = [];
+                    state.agendaTexts.unshift({
+                        id: Date.now(),
+                        title: title,
+                        content: content
+                    });
+                }
+
+                DOM.agendaEditId.value = '';
+                DOM.agendaTitleInput.value = '';
+                DOM.agendaContentInput.value = '';
+                DOM.agendaSubmitBtn.textContent = TRANSLATIONS[state.settings.lang].saveText || "Guardar Texto";
+                DOM.agendaCancelBtn.classList.add('hidden');
+
+                saveData();
+                renderAgendaTexts();
+
+                DOM.agendaSaveStatus.classList.remove('opacity-0');
+                setTimeout(() => DOM.agendaSaveStatus.classList.add('opacity-0'), 1200);
+            });
+
+            DOM.agendaCancelBtn.addEventListener('click', () => {
+                DOM.agendaEditId.value = '';
+                DOM.agendaTitleInput.value = '';
+                DOM.agendaContentInput.value = '';
+                DOM.agendaSubmitBtn.textContent = TRANSLATIONS[state.settings.lang].saveText || "Guardar Texto";
+                DOM.agendaCancelBtn.classList.add('hidden');
+            });
+
+            DOM.chartPeriodBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentChartPeriod = btn.getAttribute('data-period');
+                    DOM.chartPeriodBtns.forEach(b => {
+                        b.className = "chart-period-btn px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold transition-all";
+                    });
+                    btn.className = "chart-period-btn px-2 py-0.5 rounded-lg bg-rose-500 text-white font-bold transition-all";
+                    drawStatsChart();
+                });
+            });
+
             DOM.sidebarBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabKey = btn.getAttribute('data-tab');
@@ -1895,20 +2112,10 @@
                 });
             });
 
-            let notesTimeout;
-            DOM.notesTextarea.addEventListener('input', (e) => {
-                state.notes = e.target.value;
-                DOM.notesSaveStatus.classList.remove('opacity-0');
-                clearTimeout(notesTimeout);
-                notesTimeout = setTimeout(() => {
-                    saveData();
-                    DOM.notesSaveStatus.classList.add('opacity-0');
-                }, 800);
-            });
-
             renderTasks();
             renderStatsAndHistory();
             renderGoalsAndBadges();
+            renderAgendaTexts();
             switchMode('work');
         };
     </script>
