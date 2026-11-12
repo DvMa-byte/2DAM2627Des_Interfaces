@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proceso Pomodoro - Documentación de Desarrollo</title>
+    <!-- Tailwind CSS para un diseño moderno y limpio -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white !important; }
+            .shadow-sm, .shadow-md { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+    
+    <!-- Botón flotante para imprimir o guardar como PDF -->
+    <div class="fixed bottom-6 right-6 z-50 no-print">
+        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Guardar / Imprimir PDF</span>
+        </button>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <!-- Cabecera -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Proceso Pomodoro</h1>
+            <p class="text-lg text-gray-600">Documentación de prompts, evolución de versiones y uso de Inteligencia Artificial (2º DAM)</p>
+            <p class="text-sm text-indigo-600 font-semibold mt-1">Autor: David Moreno Alba</p>
+        </header>
+
+        <!-- Sección de Enlaces Obligatorios -->
+        <section class="bg-indigo-50 border border-indigo-100 rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-lg font-bold text-indigo-900 mb-3">Enlaces de la Práctica</h2>
+            <ul class="space-y-2 text-sm">
+                <li><strong>Aplicación Web Pomodoro:</strong> <a href="https://dvma-byte.github.io/2DAM2627Des_Interfaces/pomodoro.html" target="_blank" class="text-indigo-600 hover:underline break-all">https://dvma-byte.github.io/2DAM2627Des_Interfaces/pomodoro.html</a></li>
+                <li><strong>Repositorio GitHub:</strong> <a href="https://github.com/DvMa-byte/2DAM2627Des_Interfaces" target="_blank" class="text-indigo-600 hover:underline break-all">https://github.com/DvMa-byte/2DAM2627Des_Interfaces</a></li>
+                <li><strong>Proceso de Resolución (Esta página):</strong> <a href="https://dvma-byte.github.io/2DAM2627Des_Interfaces/proceso-pomodoro.html" target="_blank" class="text-indigo-600 hover:underline break-all">https://dvma-byte.github.io/2DAM2627Des_Interfaces/proceso-pomodoro.html</a></li>
+            </ul>
+        </section>
+
+        <!-- Introducción -->
+        <section class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900 mb-3">1. Metodología e Inteligencia Artificial Utilizada</h2>
+            <p class="text-gray-600 leading-relaxed">
+                El desarrollo de la aplicación web de temporizador Pomodoro se ha llevado a cabo de forma iterativa empleando <strong>Google Gemini</strong> como asistente principal. El flujo de trabajo se ha estructurado en fases sucesivas: desde una estructura base funcional hasta la integración de paneles avanzados de estadísticas, gestión de asignaturas personalizables con emojis y modos de concentración.
+            </p>
+        </section>
+
+        <!-- Evolución por Fases y Prompts -->
+        <section class="space-y-8">
+            <!-- Fase 1 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-indigo-600">Fase 1: Versión Inicial y Estructura Base</h3>
+                    <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-full">Versión 1.0</span>
+                </div>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Prompt Aplicado:</p>
+                <blockquote class="bg-gray-50 border-l-4 border-indigo-500 p-4 rounded text-sm text-gray-600 italic mb-4">
+                    "Quiero que me crees una aplicación web en HTML para utilizar la técnica Pomodoro y organizar mis sesiones de estudio o trabajo... Temporizador Pomodoro que permita trabajar durante 25 minutos y descansar 5 minutos... Todo en HTML, CSS y JavaScript preferiblemente dentro de un único archivo HTML..."
+                </blockquote>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Capturas del Proceso (Prompt y Resultado):</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA1.png" alt="Prompt Versión 1" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Prompt inicial introducido en Gemini[cite: 9]</p>
+                    </div>
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA2.png" alt="Resultado Versión 1" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Vista previa de la interfaz generada[cite: 10]</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 2 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-indigo-600">Fase 2: Ampliación de Funcionalidades y Estadísticas</h3>
+                    <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-full">Versión 2.0</span>
+                </div>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Prompt Aplicado:</p>
+                <blockquote class="bg-gray-50 border-l-4 border-indigo-500 p-4 rounded text-sm text-gray-600 italic mb-4">
+                    "Me gusta cómo está quedando la aplicación. Ahora quiero que añadas algunas funciones más para hacerla todavía más completa. Me gustaría que incorporases un apartado de estadísticas donde pueda consultar cuánto tiempo he estudiado cada día... un sistema de rachas... modo zen..."
+                </blockquote>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Capturas del Proceso:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA3.png" alt="Prompt Versión 2" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Prompt de ampliación de características[cite: 11]</p>
+                    </div>
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA4.png" alt="Resultado Versión 2" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Integración de estadísticas y gráficos[cite: 12]</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 3 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-indigo-600">Fase 3: Gestión de Asignaturas y Personalización</h3>
+                    <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-full">Versión Final</span>
+                </div>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Prompt Aplicado:</p>
+                <blockquote class="bg-gray-50 border-l-4 border-indigo-500 p-4 rounded text-sm text-gray-600 italic mb-4">
+                    "En la sección de elegir el tipo de tarea. Quiero que el usuario pueda crear sus propios temas de tareas e incluso borrarlos. Ponle una sección de edición donde pueda también borrar los predeterminados, te dé una selección pequeña de emojis a elegir..."
+                </blockquote>
+                <p class="text-sm font-semibold text-gray-700 mb-2">Capturas del Proceso:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA5.png" alt="Prompt Versión 3" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Prompt de gestión de temas[cite: 13]</p>
+                    </div>
+                    <div class="border rounded-lg overflow-hidden shadow-sm bg-white">
+                        <img src="IA6.png" alt="Resultado Versión 3" class="w-full h-auto">
+                        <p class="text-xs text-center text-gray-500 p-2 bg-gray-50">Modal interactivo de categorías y emojis[cite: 14]</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pie de página -->
+        <footer class="mt-12 text-center text-sm text-gray-500 border-t pt-6">
+            <p>Práctica de Desarrollo de Interfaces - 2º DAM | Autor: David Moreno Alba</p>
+        </footer>
+    </div>
+</body>
+</html>
