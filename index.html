@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador de Personas - Desarrollo de Interfaces</title>
+    <title>Contador de Personas</title>
     <!-- Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Iconos de FontAwesome -->
@@ -67,9 +66,8 @@
                 <i class="fa-solid fa-users text-2xl text-white"></i>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-300 bg-clip-text text-transparent">
-                Control de Aforo
+                Contador de Personas
             </h1>
-            <p class="text-xs text-slate-300 mt-1">Desarrollo de Interfaces</p>
         </header>
 
         <!-- Configuración del Aforo Máximo -->
@@ -149,10 +147,8 @@
     </main>
 
     <script>
-        // Variables de estado del contador
-        let hombres = 0;
-        let mujeres = 0;
-        let generales = 0;
+        // Historial de entradas para respetar el orden cronológico exacto (LIFO)
+        let historialEntradas = []; // Almacena 'hombre', 'mujer' o 'general'
 
         // Elementos del DOM
         const elementoConteoTotal = document.getElementById('conteo-total');
@@ -165,7 +161,7 @@
         // Función para activar la animación de pulso en el número principal
         function animarNumero() {
             elementoConteoTotal.classList.remove('animacion-pulso');
-            void elementoConteoTotal.offsetWidth; // Forzar recálculo
+            void elementoConteoTotal.offsetWidth;
             elementoConteoTotal.classList.add('animacion-pulso');
         }
 
@@ -180,19 +176,20 @@
         }
 
         // Verificar si se supera el aforo antes de sumar
-        function verificarAforo(cantidadASumar) {
+        function verificarAforo() {
             const aforoMax = parseInt(elementoAforoMax.value) || 100;
-            const totalActual = hombres + mujeres + generales;
-            if (totalActual + cantidadASumar > aforoMax) {
+            if (historialEntradas.length >= aforoMax) {
                 mostrarAviso(`⚠️ ¡Aforo máximo (${aforoMax}) alcanzado! No se permite la entrada.`);
                 return false;
             }
             return true;
         }
 
-        // Función de renderizado para actualizar la interfaz visual
+        // Función de renderizado para actualizar la interfaz visual basada en el historial
         function renderizar() {
-            const total = hombres + mujeres + generales;
+            const total = historialEntradas.length;
+            const hombres = historialEntradas.filter(item => item === 'hombre').length;
+            const mujeres = historialEntradas.filter(item => item === 'mujer').length;
 
             elementoConteoTotal.textContent = total;
             elementoConteoHombres.textContent = hombres;
@@ -207,59 +204,63 @@
             animarNumero();
         }
 
-        // Incrementar o decrementar el conteo de Hombres
+        // Incrementar o decrementar el conteo de Hombres de forma directa
         function actualizarHombres(valor) {
-            if (valor > 0 && !verificarAforo(1)) return;
-            if (valor < 0 && hombres <= 0) {
-                mostrarAviso("No hay hombres registrados para restar.");
-                return;
+            if (valor > 0) {
+                if (!verificarAforo()) return;
+                historialEntradas.push('hombre');
+            } else {
+                // Si se pulsa -1 en la tarjeta de hombre, se busca y elimina el último hombre registrado
+                const index = historialEntradas.lastIndexOf('hombre');
+                if (index !== -1) {
+                    historialEntradas.splice(index, 1);
+                } else {
+                    mostrarAviso("No hay hombres registrados para restar.");
+                    return;
+                }
             }
-            hombres += valor;
             renderizar();
         }
 
-        // Incrementar o decrementar el conteo de Mujeres
+        // Incrementar o decrementar el conteo de Mujeres de forma directa
         function actualizarMujeres(valor) {
-            if (valor > 0 && !verificarAforo(1)) return;
-            if (valor < 0 && mujeres <= 0) {
-                mostrarAviso("No hay mujeres registradas para restar.");
-                return;
+            if (valor > 0) {
+                if (!verificarAforo()) return;
+                historialEntradas.push('mujer');
+            } else {
+                // Si se pulsa -1 en la tarjeta de mujer, se busca y elimina la última mujer registrada
+                const index = historialEntradas.lastIndexOf('mujer');
+                if (index !== -1) {
+                    historialEntradas.splice(index, 1);
+                } else {
+                    mostrarAviso("No hay mujeres registradas para restar.");
+                    return;
+                }
             }
-            mujeres += valor;
             renderizar();
         }
 
         // Botón global de sumar +1 Persona
         function agregarPersonaGeneral() {
-            if (!verificarAforo(1)) return;
-            generales += 1;
+            if (!verificarAforo()) return;
+            historialEntradas.push('general');
             renderizar();
         }
 
-        // Botón global de restar -1 Persona
+        // Botón global de restar -1 Persona (Resta estrictamente el último en entrar)
         function quitarPersonaGeneral() {
-            const total = hombres + mujeres + generales;
-            if (total <= 0) {
+            if (historialEntradas.length === 0) {
                 mostrarAviso("El aforo ya está a 0.");
                 return;
             }
-
-            if (generales > 0) {
-                generales -= 1;
-            } else if (hombres > 0) {
-                hombres -= 1;
-            } else if (mujeres > 0) {
-                mujeres -= 1;
-            }
-
+            // Elimina el último elemento añadido al historial sin importar de qué tipo sea
+            historialEntradas.pop();
             renderizar();
         }
 
         // Reiniciar todos los contadores a 0
         function reiniciarTodo() {
-            hombres = 0;
-            mujeres = 0;
-            generales = 0;
+            historialEntradas = [];
             elementoNotificacion.textContent = '';
             renderizar();
         }
