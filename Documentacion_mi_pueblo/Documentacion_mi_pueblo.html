@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentación del Proyecto — Guía Interactiva de Callosa de Segura</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --surface: #ffffff;
+      --surface-alt: #fbf9f5;
+      --ink: #1e2421;
+      --muted: #5c6660;
+      --accent: #8c4a27;
+      --accent-soft: #f3e7df;
+      --border: #e3ddd2;
+      --shadow: 0 10px 28px rgba(30, 36, 33, 0.06);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2.25rem 1.25rem 4rem;
+    }
+
+    header.hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.75rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.85rem;
+    }
+
+    h1 {
+      margin: 0 0 0.6rem;
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.9rem;
+      margin-top: 1.5rem;
+    }
+
+    .meta-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .meta-value {
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .note-box {
+      background: var(--surface-alt);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.75rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .note-box strong {
+      color: var(--ink);
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .step-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .file-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .prompt-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.15rem;
+      margin: 0.9rem 0 1.15rem;
+    }
+
+    .prompt-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.45rem;
+    }
+
+    .prompt-text {
+      margin: 0;
+      white-space: pre-line;
+      color: var(--ink);
+      font-size: 0.96rem;
+    }
+
+    .image-panel {
+      border: 1px dashed #cfc6b6;
+      border-radius: 12px;
+      padding: 1rem;
+      background: #fcfbf8;
+    }
+
+    .image-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .upload-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.86rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .upload-btn:hover {
+      opacity: 0.92;
+    }
+
+    .upload-btn input {
+      display: none;
+    }
+
+    .img-frame {
+      text-align: center;
+    }
+
+    .img-frame img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .img-fallback {
+      display: none;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <span class="badge">Memoria del Proyecto · Desarrollo de Interfaces</span>
+      <h1>Guía Interactiva de Callosa de Segura</h1>
+      <p class="subtitle">
+        Registro del proceso de creación, diseño visual, integración de mapa interactivo y mejoras progresivas de la aplicación web.
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <span class="meta-label">Inteligencia Artificial utilizada</span>
+          <span class="meta-value">Gemini (exclusivamente)</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Municipio del proyecto</span>
+          <span class="meta-value">Callosa de Segura (Alicante)</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Capturas documentadas</span>
+          <span class="meta-value">DI1.png – DI6.png y SI7.png</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="note-box">
+      <strong>Nota sobre las capturas y los prompts:</strong> En este proyecto únicamente se ha trabajado con <strong>Gemini</strong>. Cuando en alguna captura el texto del prompt aparece cortado en pantalla, se ha completado con su redacción natural y detallada tomando como referencia lo que se ve en la propia imagen para reflejar con fidelidad lo pedido en cada paso. Los archivos de imagen se cargan desde la misma carpeta que <code>Documentacion_mi_pueblo.html</code>, y cada bloque incluye también un botón para seleccionar la imagen manualmente si se desea.
+    </div>
+
+    <main>
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">1. Planteamiento inicial, estética y estructura de la guía</h2>
+          <span class="file-tag">DI1.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Prompt redactado a partir de la captura (completado donde se recorta en pantalla)</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Quiero que me ayudes a crear una aplicación web que sea una guía turística interactiva de Callosa de Segura, un municipio de Alicante. Quiero que tenga un diseño bastante cuidado, moderno y atractivo, como si fuese una aplicación turística profesional que alguien pudiese utilizar de verdad para descubrir el pueblo.
+Me gustaría que tuviese un estilo visual premium, con tonos crema, blancos, beige y algunos detalles en colores naturales. Quiero utilizar fotografías grandes y de buena calidad, tarjetas con bordes suaves, tipografías elegantes y una distribución visual bastante atractiva. Me gustan las páginas que utilizan fotografías como protagonistas y que tienen una estética similar a las aplicaciones modernas de viajes.
+Pero hay algo que quiero dejar claro desde el principio: no quiero una web aburrida, típica ni excesivamente sencilla. Quiero que sea entretenida de utilizar, que tenga bastantes elementos interactivos y que dé ganas de explorar sus diferentes apartados. Cada funcionalidad debe tener sentido y estar relacionada con la temática de la aplicación.
+La aplicación estará dedicada a Callosa de Segura, por lo que quiero que investigues un poco el municipio y utilices lugares, tradiciones y elementos que existan realmente allí.
+1. Página de inicio: quiero una página principal que tenga bastante personalidad, con una fotografía panorámica de Callosa de Segura ocupando buena parte de la pantalla, un título atractivo y una pequeña introducción que invite a descubrir el municipio, además de un buscador para localizar lugares, restaurantes, monumentos o actividades dentro de la aplicación y secciones o tarjetas recomendadas debajo.
+2. Descubre Callosa: quiero una sección dedicada a los lugares más interesantes del municipio, con categorías claras, fichas informativas de cada sitio y opciones interactivas para seguir explorando el contenido sin que resulte pesado.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI1.png</span>
+            <label class="upload-btn">
+              Cargar DI1.png manualmente
+              <input type="file" accept="image/*" data-target="img-di1" data-fallback="fb-di1" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di1" src="DI1.png" alt="Captura DI1.png: prompt inicial de la guía interactiva de Callosa de Segura" />
+            <div id="fb-di1" class="img-fallback">No se ha encontrado <strong>DI1.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">2. Primera vista previa de portada y navegación superior</h2>
+          <span class="file-tag">DI2.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Contexto del paso y prompt aplicado en la captura</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Con la base de la guía ya generada, reviso la vista previa de la portada y ajusto la presentación principal sobre la fotografía de Callosa de Segura («Descubre la Joya al Pie de la Sierra» en la Vega Baja del Segura, Alicante) junto con los botones de acción («Explorar Lugares» y «Ver Mapa Interactivo»), la barra superior con el buscador, el pasaporte, favoritos, selector de tema y las tarjetas inferiores de acceso rápido.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI2.png</span>
+            <label class="upload-btn">
+              Cargar DI2.png manualmente
+              <input type="file" accept="image/*" data-target="img-di2" data-fallback="fb-di2" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di2" src="DI2.png" alt="Captura DI2.png: vista previa de la portada de Callosa de Segura" />
+            <div id="fb-di2" class="img-fallback">No se ha encontrado <strong>DI2.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">3. Ajuste de fotografía gastronómica e incorporación del mapa interactivo</h2>
+          <span class="file-tag">DI3.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Prompt redactado a partir de la captura (completado donde se recorta en pantalla)</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Después de actualizar la fotografía de Arroz de Vigilia / Huerta dentro del apartado gastronómico, quiero que ahora mejores la página web incorporando un mapa turístico interactivo de Callosa de Segura (Alicante). Quiero que esta sección tenga bastante protagonismo y parezca una herramienta turística real. El visitante debe poder explorar el municipio, localizar sus lugares de interés y organizar sus propias visitas.
+IMPORTANTE: trabaja sobre el HTML actual. Conserva el diseño, los apartados, las fotografías y las funcionalidades que ya hemos incorporado. No reconstruyas la web desde cero.
+1. Mapa interactivo del municipio: incorpora un mapa real de Callosa de Segura utilizando Leaflet y OpenStreetMap, con marcadores por categorías, filtros, fichas y herramientas para crear o consultar rutas.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI3.png</span>
+            <label class="upload-btn">
+              Cargar DI3.png manualmente
+              <input type="file" accept="image/*" data-target="img-di3" data-fallback="fb-di3" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di3" src="DI3.png" alt="Captura DI3.png: actualización gastronómica y prompt del mapa interactivo" />
+            <div id="fb-di3" class="img-fallback">No se ha encontrado <strong>DI3.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">4. Detección del bloqueo 403 en las teselas de OpenStreetMap</h2>
+          <span class="file-tag">DI4.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Contexto del paso y prompt aplicado en la captura</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Al probar la vista previa con el mapa y las categorías («Todos», «Monumentos», «Museos», «Gastronomía», «Naturaleza», «Fiestas y cultura», «Otros puntos de interés»), veo que las teselas del mapa muestran «403 Access blocked» por la política de uso de los servidores de OpenStreetMap. Necesito que revises cómo se cargan las capas del mapa para que no aparezcan bloqueadas y el mapa se vea correctamente.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI4.png</span>
+            <label class="upload-btn">
+              Cargar DI4.png manualmente
+              <input type="file" accept="image/*" data-target="img-di4" data-fallback="fb-di4" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di4" src="DI4.png" alt="Captura DI4.png: error 403 Access blocked en las teselas del mapa" />
+            <div id="fb-di4" class="img-fallback">No se ha encontrado <strong>DI4.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">5. Solución al error 403 cambiando a OpenTopoMap y ajuste en modo oscuro</h2>
+          <span class="file-tag">DI5.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Prompt redactado a partir de la captura (completado donde se recorta en pantalla)</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+En la vista previa del mapa me sigue saliendo el error 403 Access blocked indicando que no se cumple la política de uso de los servidores de OpenStreetMap (osm.wiki/Blocked). Quiero que trabajes sobre el HTML completo que te adjunto para cambiar la capa principal a una fuente de mapas que no dé este bloqueo en la vista previa, manteniendo la atribución visible, un respaldo automático si falla alguna capa y ajustando el filtro del modo oscuro sobre las teselas para que el mapa siga leyéndose bien tanto en tema claro como oscuro.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI5.png</span>
+            <label class="upload-btn">
+              Cargar DI5.png manualmente
+              <input type="file" accept="image/*" data-target="img-di5" data-fallback="fb-di5" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di5" src="DI5.png" alt="Captura DI5.png: prompt para resolver el error 403 y respuesta de Gemini" />
+            <div id="fb-di5" class="img-fallback">No se ha encontrado <strong>DI5.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">6. Comprobación del mapa topográfico de Callosa de Segura y su sierra</h2>
+          <span class="file-tag">DI6.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Contexto del paso y prompt aplicado en la captura</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Con el cambio aplicado, compruebo en la vista previa que el mapa turístico interactivo de Callosa de Segura ya carga con normalidad sin errores 403, mostrando el núcleo urbano, la zona de La Huerta, el relieve de la Sierra de Callosa y los marcadores de colores según la leyenda de categorías.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: DI6.png</span>
+            <label class="upload-btn">
+              Cargar DI6.png manualmente
+              <input type="file" accept="image/*" data-target="img-di6" data-fallback="fb-di6" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-di6" src="DI6.png" alt="Captura DI6.png: mapa interactivo de Callosa de Segura cargado correctamente" />
+            <div id="fb-di6" class="img-fallback">No se ha encontrado <strong>DI6.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="step-card">
+        <div class="step-header">
+          <h2 class="step-title">7. Incorporación de fotografías reales en barrios e institutos</h2>
+          <span class="file-tag">SI7.png</span>
+        </div>
+        <div class="prompt-box">
+          <span class="prompt-label">Prompt redactado a partir de la captura (completado donde se recorta en pantalla)</span>
+          <p class="prompt-text">Como no me cabe en la imagen escribo aquí el prompt usado y con lo que salga en la imagen lo asimilas:
+Quiero mejorar un poco la sección de «Barrios y vida local». He visto que las tarjetas de los barrios y de los institutos se ven bastante sencillas, porque solo tienen un icono y un texto. Me gustaría que añadieras una fotografía real a cada tarjeta para que el apartado se vea más visual, completo y coherente con el resto de la guía, cuidando el encuadre y que no se rompa el diseño si alguna imagen tarda en cargar o falla.</p>
+        </div>
+        <div class="image-panel">
+          <div class="image-toolbar">
+            <span class="file-tag">Archivo esperado: SI7.png</span>
+            <label class="upload-btn">
+              Cargar SI7.png manualmente
+              <input type="file" accept="image/*" data-target="img-si7" data-fallback="fb-si7" />
+            </label>
+          </div>
+          <div class="img-frame">
+            <img id="img-si7" src="SI7.png" alt="Captura SI7.png: mejora de las tarjetas de barrios e institutos con fotografías" />
+            <div id="fb-si7" class="img-fallback">No se ha encontrado <strong>SI7.png</strong> en la misma carpeta del HTML. Puedes seleccionarlo con el botón de arriba.</div>
+          </div>
+        </div>
+      </article>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll('img').forEach((img) => {
+      const fallbackId = img.id.replace('img-', 'fb-');
+      const fallback = document.getElementById(fallbackId);
+
+      img.addEventListener('error', () => {
+        img.style.display = 'none';
+        if (fallback) fallback.style.display = 'block';
+      });
+
+      img.addEventListener('load', () => {
+        img.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
+      });
+    });
+
+    document.querySelectorAll('input[type="file"][data-target]').forEach((input) => {
+      input.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const img = document.getElementById(input.dataset.target);
+        const fallback = document.getElementById(input.dataset.fallback);
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          if (img) {
+            img.src = ev.target.result;
+            img.style.display = 'block';
+          }
+          if (fallback) fallback.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  </script>
+</body>
+</html>
