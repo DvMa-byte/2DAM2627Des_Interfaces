@@ -1,0 +1,2838 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Callosa Experience | Guía Turística Interactiva de Callosa de Segura</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FDFBF7',
+                            100: '#FAF6EE',
+                            200: '#F3EAD8',
+                            300: '#E9D9BF',
+                        },
+                        terracotta: {
+                            500: '#C86D51',
+                            600: '#B25B41',
+                        },
+                        olive: {
+                            600: '#4A6B5D',
+                            700: '#3A5449',
+                        },
+                        earth: {
+                            800: '#2C2523',
+                            900: '#1F1918',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet JS & CSS for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF6EE;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1F1918;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C86D51;
+            border-radius: 4px;
+        }
+
+        /* Bloqueo estricto de desplazamiento horizontal en móvil y escritorio */
+        html, body, #__next, main, section, header, footer {
+            max-width: 100%;
+            overflow-x: clip;
+        }
+        #leafletMap, .leaflet-container {
+            max-width: 100%;
+        }
+
+        .stamp-animation {
+            animation: stampBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes stampBounce {
+            0% { transform: scale(3) rotate(-15deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Image fallback container styles */
+        .img-container {
+            position: relative;
+            background-color: #F3EAD8;
+            overflow: hidden;
+        }
+        .dark .img-container {
+            background-color: #2C2523;
+        }
+        .img-fallback-active img {
+            display: none !important;
+        }
+        .img-fallback-placeholder {
+            display: none;
+        }
+        .img-fallback-active .img-fallback-placeholder {
+            display: flex !important;
+        }
+
+        /* Leaflet Map legibility in dark mode without harsh color inversion */
+        .dark .leaflet-tile-pane {
+            filter: brightness(0.95) contrast(1.02) saturate(1.0);
+        }
+        .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
+            background-color: #2C2523;
+            color: #FAF6EE;
+        }
+        .dark .leaflet-control-attribution {
+            background: rgba(31, 25, 24, 0.85) !important;
+            color: #FAF6EE !important;
+        }
+        .dark .leaflet-control-attribution a {
+            color: #E9D9BF !important;
+        }
+        .custom-div-icon {
+            background: transparent;
+            border: none;
+        }
+        .map-pin-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 13px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            border: 2px solid #ffffff;
+            transition: transform 0.2s ease;
+        }
+        .map-pin-badge:hover {
+            transform: scale(1.12);
+        }
+        .route-order-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: #2C2523;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transform: translate(10px, -12px);
+        }
+
+        /* Botón flotante de Subir (scroll-to-top) fijo abajo a la derecha */
+        #scrollToTopBtn {
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 999;
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #C86D51;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 12px 24px -6px rgba(31, 25, 24, 0.28);
+            cursor: pointer;
+            transition: opacity 0.28s ease, transform 0.28s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        @media (min-width: 640px) {
+            #scrollToTopBtn {
+                bottom: 24px;
+                right: 24px;
+                width: 48px;
+                height: 48px;
+            }
+        }
+        #scrollToTopBtn:hover {
+            background-color: #B25B41;
+            box-shadow: 0 16px 28px -6px rgba(31, 25, 24, 0.36);
+        }
+        #scrollToTopBtn:focus-visible {
+            outline: 2px solid #C86D51;
+            outline-offset: 3px;
+        }
+        .dark #scrollToTopBtn {
+            background-color: #2C2523;
+            color: #FAF6EE;
+            border: 1px solid rgba(233, 217, 191, 0.28);
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.55);
+        }
+        .dark #scrollToTopBtn:hover {
+            background-color: #C86D51;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-cream-50 text-earth-800 dark:bg-earth-900 dark:text-cream-100 font-sans transition-colors duration-300 min-h-screen flex flex-col w-full">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 w-full bg-cream-100/95 dark:bg-earth-900/95 backdrop-blur-md border-b border-cream-200 dark:border-earth-800 transition-colors">
+        <div class="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+
+            <!-- Logo -->
+            <a href="#inicio" class="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-terracotta-500 text-white flex items-center justify-center font-serif text-lg sm:text-xl font-bold shadow-md shrink-0">
+                    C
+                </div>
+                <div class="min-w-0">
+                    <span class="font-serif text-lg sm:text-2xl font-bold tracking-tight text-earth-800 dark:text-cream-50 block leading-none truncate">
+                        CALLOSA
+                    </span>
+                    <span class="text-[10px] sm:text-xs uppercase tracking-widest text-terracotta-500 font-semibold block mt-0.5 sm:mt-1 truncate">
+                        Experience
+                    </span>
+                </div>
+            </a>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex flex-1 max-w-xs relative">
+                <input type="text" id="globalSearch" placeholder="Buscar lugares, platos, fiestas..."
+                    class="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-800 focus:outline-none focus:ring-2 focus:ring-terracotta-500 transition-all">
+                <span class="pointer-events-none absolute left-3.5 top-2.5 text-earth-800/40 dark:text-cream-100/40 text-sm" aria-hidden="true">🔍</span>
+                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-earth-800 rounded-xl shadow-xl border border-cream-200 dark:border-earth-800 max-h-80 overflow-y-auto z-50 p-2"></div>
+            </div>
+
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden lg:flex items-center gap-6 text-sm font-medium">
+                <a href="#descubre" class="hover:text-terracotta-500 transition-colors">Descubre</a>
+                <a href="#gastronomia" class="hover:text-terracotta-500 transition-colors">Gastronomía</a>
+                <a href="#barrios" class="hover:text-terracotta-500 transition-colors">Barrios</a>
+                <a href="#deportes" class="hover:text-terracotta-500 transition-colors">Deportes</a>
+                <a href="#cultura" class="hover:text-terracotta-500 transition-colors">Cultura y País</a>
+                <a href="#naturaleza" class="hover:text-terracotta-500 transition-colors">Naturaleza</a>
+                <a href="#mapa" class="hover:text-terracotta-500 transition-colors">Mapa</a>
+                <a href="#rutasGuardadas" class="hover:text-terracotta-500 transition-colors">Mis Rutas</a>
+            </nav>
+
+            <!-- Actions (Theme Switcher, Passport, Mobile Menu toggle) -->
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <!-- Passport Badge -->
+                <a href="#pasaporte" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-cream-200/70 dark:bg-earth-800 hover:bg-terracotta-500 hover:text-white transition-all text-[11px] sm:text-xs font-semibold whitespace-nowrap">
+                    <span aria-hidden="true">🛂</span>
+                    <span class="hidden xs:inline sm:inline">Pasaporte:</span>
+                    <span><strong id="stampCount">0</strong>/8</span>
+                </a>
+
+                <!-- Favorites Badge -->
+                <button type="button" onclick="scrollToFavorites()" class="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-full bg-cream-200/70 dark:bg-earth-800 hover:bg-rose-500 hover:text-white transition-all text-[11px] sm:text-xs font-semibold whitespace-nowrap">
+                    <span class="text-rose-500" aria-hidden="true">♥</span>
+                    <span id="favCount">0</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button type="button" id="themeToggle" aria-label="Cambiar Tema" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cream-200/70 dark:bg-earth-800 flex items-center justify-center hover:bg-cream-300 dark:hover:bg-earth-800 transition-colors shrink-0">
+                    <span class="dark:hidden text-earth-800 text-sm" aria-hidden="true">🌙</span>
+                    <span class="hidden dark:block text-amber-400 text-sm" aria-hidden="true">☀️</span>
+                </button>
+
+                <!-- Mobile menu button -->
+                <button type="button" id="mobileMenuBtn" aria-label="Abrir Menú" aria-expanded="false" aria-controls="mobileMenu" class="lg:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cream-200/70 dark:bg-earth-800 flex items-center justify-center shrink-0">
+                    <span class="text-base sm:text-lg leading-none" aria-hidden="true">☰</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden w-full border-t border-cream-200 dark:border-earth-800 bg-cream-100 dark:bg-earth-900 px-4 py-4 space-y-2.5">
+            <div class="relative mb-3">
+                <input type="text" id="globalSearchMobile" placeholder="Buscar..."
+                    class="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-800 focus:outline-none">
+                <span class="pointer-events-none absolute left-3.5 top-2.5 text-earth-800/40 dark:text-cream-100/40 text-sm" aria-hidden="true">🔍</span>
+            </div>
+            <a href="#descubre" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Descubre Callosa</a>
+            <a href="#gastronomia" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Gastronomía</a>
+            <a href="#barrios" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Barrios y Vida Local</a>
+            <a href="#deportes" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Deportes Locales</a>
+            <a href="#cultura" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Cultura, Historia y País</a>
+            <a href="#naturaleza" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Naturaleza y Sierra</a>
+            <a href="#mapa" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Mapa Interactivo</a>
+            <a href="#pasaporte" class="block py-1.5 text-sm sm:text-base font-medium hover:text-terracotta-500">Mi Pasaporte &amp; Trivia</a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow w-full">
+
+        <!-- SECTION 1: HERO -->
+        <section id="inicio" class="relative min-h-[75vh] sm:min-h-[85vh] flex items-center justify-center overflow-hidden w-full">
+            <div class="absolute inset-0 z-0 img-container">
+                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/05/fotocallosa1.jpg"
+                     alt="Panorámica de Callosa de Segura y su Sierra"
+                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                     class="w-full h-full object-cover object-center filter brightness-[0.75] dark:brightness-[0.62] transition-all duration-700">
+                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-earth-800 text-cream-100 p-6 text-center">
+                    <span class="text-4xl mb-3" aria-hidden="true">⛰️</span>
+                    <h2 class="font-serif text-3xl font-bold">Callosa de Segura</h2>
+                    <p class="text-sm opacity-70">Capital del Cáñamo · Vega Baja del Segura</p>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-cream-50 dark:from-earth-900 via-transparent to-black/30"></div>
+            </div>
+
+            <div class="relative z-10 max-w-5xl mx-auto w-full px-4 sm:px-6 text-center text-white py-14 sm:py-20">
+                <span class="inline-block px-3.5 py-1 rounded-full bg-terracotta-500/90 text-white text-[11px] sm:text-sm font-semibold tracking-wider uppercase mb-4 sm:mb-6 shadow-lg backdrop-blur-sm">
+                    Vega Baja del Segura · Alicante
+                </span>
+                <h1 class="font-serif text-3xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-4 sm:mb-6 drop-shadow-md leading-tight break-words">
+                    Descubre la Joya al Pie de la Sierra
+                </h1>
+                <p class="text-sm sm:text-xl max-w-2xl mx-auto font-light text-cream-100 mb-7 sm:mb-10 drop-shadow leading-relaxed">
+                    Historia milenaria, patrimonio emblemático, tradición del cáñamo y sabores inolvidables en el corazón de Alicante.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
+                    <a href="#descubre" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white text-sm sm:text-base font-semibold transition-all transform hover:-translate-y-0.5 shadow-xl">
+                        Explorar Lugares
+                    </a>
+                    <a href="#mapa" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/40 text-sm sm:text-base font-semibold transition-all transform hover:-translate-y-0.5 shadow-xl">
+                        Ver Mapa Interactivo
+                    </a>
+                </div>
+            </div>
+
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+                <a href="#descubre" class="text-white/80 hover:text-white text-xl" aria-label="Desplazar hacia abajo">
+                    <span aria-hidden="true">↓</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- HIGHLIGHTS / QUICK ACCESS -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 mb-20">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="#descubre" class="p-6 rounded-2xl bg-white dark:bg-earth-800 shadow-xl border border-cream-200 dark:border-earth-800 hover:border-terracotta-500 transition-all group block text-left">
+                    <div class="w-12 h-12 rounded-xl bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                        🏛️
+                    </div>
+                    <h3 class="font-serif font-bold text-lg mb-1 group-hover:text-terracotta-500 transition-colors">Patrimonio Histórico</h3>
+                    <p class="text-xs text-earth-800/70 dark:text-cream-100/70">Santuario de San Roque, Iglesia de San Martín y el Castillo Real.</p>
+                </a>
+
+                <a href="#naturaleza" class="p-6 rounded-2xl bg-white dark:bg-earth-800 shadow-xl border border-cream-200 dark:border-earth-800 hover:border-terracotta-500 transition-all group block text-left">
+                    <div class="w-12 h-12 rounded-xl bg-olive-600/10 text-olive-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                        🏔️
+                    </div>
+                    <h3 class="font-serif font-bold text-lg mb-1 group-hover:text-terracotta-500 transition-colors">Sierra de Callosa</h3>
+                    <p class="text-xs text-earth-800/70 dark:text-cream-100/70">Senderismo, Vía Ferrata y miradores espectaculares de la comarca.</p>
+                </a>
+
+                <a href="#gastronomia" class="p-6 rounded-2xl bg-white dark:bg-earth-800 shadow-xl border border-cream-200 dark:border-earth-800 hover:border-terracotta-500 transition-all group block text-left">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                        🍲
+                    </div>
+                    <h3 class="font-serif font-bold text-lg mb-1 group-hover:text-terracotta-500 transition-colors">Gastronomía Única</h3>
+                    <p class="text-xs text-earth-800/70 dark:text-cream-100/70">Arroz con Costra, Bacalao Meneao y auténticas Almojábanas.</p>
+                </a>
+
+                <a href="#cultura" class="p-6 rounded-2xl bg-white dark:bg-earth-800 shadow-xl border border-cream-200 dark:border-earth-800 hover:border-terracotta-500 transition-all group block text-left">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform" aria-hidden="true">
+                        🧵
+                    </div>
+                    <h3 class="font-serif font-bold text-lg mb-1 group-hover:text-terracotta-500 transition-colors">Tradición del Cáñamo</h3>
+                    <p class="text-xs text-earth-800/70 dark:text-cream-100/70">La Capital del Cáñamo y su célebre Escuela e Industria artesana.</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DESCUBRE CALLOSA (LUGARES) -->
+        <section id="descubre" class="py-16 bg-cream-100/50 dark:bg-earth-900/50 border-t border-b border-cream-200 dark:border-earth-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div>
+                        <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Patrimonio y Espacios</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold mt-1">Descubre Callosa de Segura</h2>
+                        <p class="text-earth-800/70 dark:text-cream-100/70 mt-2 max-w-xl">Explora los monumentos, museos y miradores emblemáticos que marcan la identidad e historia del municipio.</p>
+                    </div>
+
+                    <!-- Category Filters -->
+                    <div class="flex flex-wrap gap-2" id="placeFilters">
+                        <button type="button" data-cat="all" class="filter-btn active px-4 py-2 rounded-full text-xs font-semibold bg-terracotta-500 text-white shadow-sm transition-all">Todos</button>
+                        <button type="button" data-cat="monumentos" class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 hover:bg-cream-200 text-earth-800 dark:text-cream-100 transition-all">Monumentos</button>
+                        <button type="button" data-cat="museos" class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 hover:bg-cream-200 text-earth-800 dark:text-cream-100 transition-all">Museos</button>
+                        <button type="button" data-cat="naturaleza" class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 hover:bg-cream-200 text-earth-800 dark:text-cream-100 transition-all">Naturaleza</button>
+                    </div>
+                </div>
+
+                <!-- Places Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="placesGrid">
+                    <!-- Dynamic rendering via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: GASTRONOMÍA DE CALLOSA -->
+        <section id="gastronomia" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Tradición Culinaria</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Gastronomía Callosina</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-4">Platos autóctonos con el sabor auténtico de la Huerta de la Vega Baja y recetas tradicionales heredadas de generación en generación.</p>
+                </div>
+
+                <!-- Interactive Filter Tabs -->
+                <div class="flex justify-center gap-3 mb-12 flex-wrap" id="gastroFilters">
+                    <button type="button" data-gcat="all" class="gfilter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-terracotta-500 text-white shadow-sm">Todos los platos</button>
+                    <button type="button" data-gcat="arroces" class="gfilter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100">Arroces y Huerta</button>
+                    <button type="button" data-gcat="guisos" class="gfilter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100">Guisos</button>
+                    <button type="button" data-gcat="dulces" class="gfilter-btn px-5 py-2.5 rounded-full text-sm font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100">Repostería Tradicional</button>
+                </div>
+
+                <!-- Dishes Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gastroGrid">
+                    <!-- Dynamic Dishes JavaScript -->
+                </div>
+
+                <!-- Interactive "Sabores de Callosa" Feature -->
+                <div class="mt-20 p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-cream-200 to-cream-100 dark:from-earth-800 dark:to-earth-900 border border-cream-300 dark:border-earth-700 relative overflow-hidden shadow-xl">
+                    <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <div class="lg:col-span-5">
+                            <span class="inline-block px-3 py-1 rounded-md bg-terracotta-500 text-white text-xs font-bold uppercase tracking-wider mb-4">Experiencia Interactiva</span>
+                            <h3 class="font-serif text-3xl font-bold mb-4">Sabores de Callosa</h3>
+                            <p class="text-sm text-earth-800/80 dark:text-cream-100/80 mb-6">Haz clic en los secretos culinarios para conocer la curiosidad e historia detrás de las recetas más famosas del municipio.</p>
+
+                            <div class="space-y-3" id="gastroTriviaSelector">
+                                <!-- Triggers via JS -->
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-7 bg-white dark:bg-earth-900 p-6 sm:p-8 rounded-2xl shadow-lg border border-cream-200 dark:border-earth-800 min-h-[250px] flex flex-col justify-center" id="gastroTriviaCard">
+                            <div class="text-center py-6 text-earth-800/50 dark:text-cream-100/50">
+                                <span class="text-4xl mb-3 block" aria-hidden="true">🍽️</span>
+                                <p>Selecciona una curiosidad gastronómica de la izquierda para descubrir su historia.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4: BARRIOS & VIDA LOCAL -->
+        <section id="barrios" class="py-20 bg-cream-100/50 dark:bg-earth-900/50 border-t border-b border-cream-200 dark:border-earth-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Entorno Urbano y Formación</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Barrios, Huerta y Vida Local</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-4">Conoce los rincones con encanto del núcleo urbano, las zonas agrícolas de la huerta y los centros de educación secundaria que vertebran el municipio.</p>
+                </div>
+
+                <!-- Neighborhood Cards with Real Photos -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+                    <!-- Barrio San José -->
+                    <div class="rounded-3xl bg-white dark:bg-earth-800 shadow-md border border-cream-200 dark:border-earth-800 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container relative">
+                                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/05/campo-de-futbol-frasquitina-300x288.jpg"
+                                     alt="Campo de fútbol La Frasquitina en el Barrio San José"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">🏘️</span>
+                                    <span class="text-xs font-medium">Barrio San José</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-serif text-xl font-bold mb-2">Barrio San José</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 mb-4">Pintoresco barrio empinado a las faldas de la sierra, caracterizado por sus calles estrechas, su ermita dedicada a San José, el emblemático campo de fútbol La Frasquitina y sus idílicas vistas de la vega.</p>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 pt-0">
+                            <span class="inline-block px-3 py-1 rounded-full bg-cream-200 dark:bg-earth-900 text-xs font-semibold text-terracotta-500">Cultura Popular</span>
+                        </div>
+                    </div>
+
+                    <!-- El Palmeral y La Monsina -->
+                    <div class="rounded-3xl bg-white dark:bg-earth-800 shadow-md border border-cream-200 dark:border-earth-800 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container relative">
+                                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/09/Campo-de-futbol-El-Palmeral.jpeg"
+                                     alt="Campo de fútbol El Palmeral y entorno de la huerta callosina"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">🌴</span>
+                                    <span class="text-xs font-medium">El Palmeral y La Monsina</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-serif text-xl font-bold mb-2">El Palmeral y La Monsina</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 mb-4">Zonas tradicionales donde confluyen la agricultura histórica de regadío, el campo deportivo municipal El Palmeral, huertos de palmeras y áreas residenciales de La Monsina integradas con el entorno natural.</p>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 pt-0">
+                            <span class="inline-block px-3 py-1 rounded-full bg-cream-200 dark:bg-earth-900 text-xs font-semibold text-olive-600">Huerta Tradicional</span>
+                        </div>
+                    </div>
+
+                    <!-- Barrio de los Dolores -->
+                    <div class="rounded-3xl bg-white dark:bg-earth-800 shadow-md border border-cream-200 dark:border-earth-800 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container relative">
+                                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/06/Ermita-de-los-Dolores-Fachada-vistas-1024x861.jpg"
+                                     alt="Fachada de la Ermita del Barrio de los Dolores"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">🏡</span>
+                                    <span class="text-xs font-medium">Barrio de los Dolores</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-serif text-xl font-bold mb-2">Barrio de los Dolores</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 mb-4">Barrio emblemático con gran raigambre vecinal y festiva, centrado alrededor de su histórica Ermita de los Dolores y sus eventos comunitarios tradicionales.</p>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 pt-0">
+                            <span class="inline-block px-3 py-1 rounded-full bg-cream-200 dark:bg-earth-900 text-xs font-semibold text-amber-600">Vida Comunitaria</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Centros Educativos Reales con Fotografías -->
+                <div class="bg-white dark:bg-earth-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-cream-200 dark:border-earth-800">
+                    <h3 class="font-serif text-2xl font-bold mb-6 flex items-center gap-3">
+                        <span class="text-terracotta-500" aria-hidden="true">🎓</span>
+                        Centros Educativos de Educación Secundaria
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- IES Vega Baja -->
+                        <div onclick="openPlaceModal('ies-vega-baja')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlaceModal('ies-vega-baja');}" class="rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:border-terracotta-500 transition-all cursor-pointer group">
+                            <div>
+                                <div class="h-44 img-container relative bg-white dark:bg-earth-800 flex items-center justify-center p-4">
+                                    <img src="https://www.micole.net/imagenes/colegio/logo/29588/vega-baja_512.png"
+                                         alt="Emblema oficial del IES Vega Baja de Callosa de Segura"
+                                         onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                         class="max-h-full max-w-full object-contain">
+                                    <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                        <span class="text-2xl mb-1" aria-hidden="true">🏫</span>
+                                        <span class="text-xs font-medium">IES Vega Baja</span>
+                                    </div>
+                                </div>
+                                <div class="p-5">
+                                    <h4 class="font-bold text-lg text-terracotta-500 mb-1 group-hover:underline">IES Vega Baja</h4>
+                                    <p class="text-xs text-earth-800/60 dark:text-cream-100/60 mb-3">Centro Público de Educación Secundaria, Bachillerato y Formación Profesional</p>
+                                    <p class="text-sm text-earth-800/80 dark:text-cream-100/80">Referente educativo en la comarca con oferta formativa diversa. Ubicado en Partida Lo Gallego.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IES Santiago Grisolía -->
+                        <div onclick="openPlaceModal('ies-santiago-grisolia')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlaceModal('ies-santiago-grisolia');}" class="rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:border-terracotta-500 transition-all cursor-pointer group">
+                            <div>
+                                <div class="h-44 img-container relative">
+                                    <img src="https://estaticos-cdn.prensaiberica.es/clip/c305c9fa-3b80-4fee-8e40-b06b18d78a20_alta-libre-aspect-ratio_default_0.jpg"
+                                         alt="Instalaciones del IES Santiago Grisolía de Callosa de Segura"
+                                         onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                         class="w-full h-full object-cover">
+                                    <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                        <span class="text-2xl mb-1" aria-hidden="true">🏫</span>
+                                        <span class="text-xs font-medium">IES Santiago Grisolía</span>
+                                    </div>
+                                </div>
+                                <div class="p-5">
+                                    <h4 class="font-bold text-lg text-terracotta-500 mb-1 group-hover:underline">IES Santiago Grisolía</h4>
+                                    <p class="text-xs text-earth-800/60 dark:text-cream-100/60 mb-3">Instituto de Educación Secundaria y Bachillerato</p>
+                                    <p class="text-sm text-earth-800/80 dark:text-cream-100/80">Nombrado en honor al insigne científico valenciano, forma a cientos de jóvenes callosinos cada año.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4B: DEPORTES Y VIDA ACTIVA -->
+        <section id="deportes" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-olive-600 font-semibold text-sm uppercase tracking-wider">Actividad Física y Montaña</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Deportes en Callosa y la Sierra</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-4">Instalaciones deportivas municipales, fútbol local, senderismo y escalada en la Sierra de Callosa.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container">
+                                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/09/Campo-de-futbol-El-Palmeral.jpeg"
+                                     alt="Campo de fútbol El Palmeral en Callosa de Segura"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">⚽</span>
+                                    <span class="text-xs font-medium">Campo El Palmeral</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block px-3 py-1 rounded-full bg-olive-600/10 text-olive-700 dark:text-emerald-300 text-xs font-semibold mb-2">Fútbol Municipal</span>
+                                <h3 class="font-serif text-xl font-bold mb-2">Campo de Fútbol El Palmeral</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70">Escenario de competiciones y cantera deportiva local rodeado de la vegetación característica de la zona.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container">
+                                <img src="https://www.callosadesegura.es/wp-content/uploads/2022/05/campo-de-futbol-frasquitina-300x288.jpg"
+                                     alt="Campo de fútbol La Frasquitina"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">🏟️</span>
+                                    <span class="text-xs font-medium">La Frasquitina</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block px-3 py-1 rounded-full bg-terracotta-500/10 text-terracotta-500 text-xs font-semibold mb-2">Deporte de Barrio</span>
+                                <h3 class="font-serif text-xl font-bold mb-2">La Frasquitina</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70">Espacio emblemático vinculado al deporte popular en el entorno del Barrio San José y la ladera.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-48 img-container">
+                                <img src="https://2.bp.blogspot.com/-zjh-3QSFgC8/TgLyplzoOmI/AAAAAAAABRc/v7cTxbBgzLQ/s1600/P6180210.JPG"
+                                     alt="Senderismo y escalada en la Sierra de Callosa"
+                                     onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                                     class="w-full h-full object-cover">
+                                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                                    <span class="text-2xl mb-1" aria-hidden="true">🧗</span>
+                                    <span class="text-xs font-medium">Montaña y Vía Ferrata</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-xs font-semibold mb-2">Aire Libre</span>
+                                <h3 class="font-serif text-xl font-bold mb-2">Senderismo, Escalada y Ferrata</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70">La Sierra de Callosa atrae a aficionados al senderismo, vías de escalada y recorridos de montaña en plena Vega Baja.</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 5: CULTURA, HISTORIA Y TRADICIONES -->
+        <section id="cultura" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Identidad y Legado</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Cultura e Historia</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-4">Un viaje en el tiempo desde los poblados argáricos prehispánicos hasta las grandes festividades populares.</p>
+                </div>
+
+                <!-- Culture Grid with REAL Photos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16" id="traditionsGrid">
+                    <!-- Injected by JS -->
+                </div>
+
+                <!-- Interactive Timeline -->
+                <div class="mb-20">
+                    <h3 class="font-serif text-2xl font-bold text-center mb-10">Línea del Tiempo Histórica</h3>
+                    <div class="relative wrap overflow-hidden p-4 sm:p-10">
+                        <div class="border-2-2 absolute border-opacity-20 border-terracotta-500 h-full border left-1/2 -ml-0.5"></div>
+
+                        <div class="space-y-8" id="timelineContainer">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Culture Accordion (Fiestas & Traditions) -->
+                <div class="max-w-4xl mx-auto">
+                    <h3 class="font-serif text-2xl font-bold text-center mb-8">Fiestas, Tradiciones y Contexto de País</h3>
+                    <div class="space-y-4" id="cultureAccordion">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 6: NATURALEZA Y PLANIFICADOR DE RUTAS -->
+        <section id="naturaleza" class="py-20 bg-cream-100/50 dark:bg-earth-900/50 border-t border-b border-cream-200 dark:border-earth-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-olive-600 font-semibold text-sm uppercase tracking-wider">Senderismo y Aventura</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Sierra de Callosa y Rutas</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-4">Descubre parajes naturales, paredones de escalada y senderos con vistas impresionantes a toda la comarca de la Vega Baja.</p>
+                </div>
+
+                <!-- Sierra Hero Image -->
+                <div class="rounded-3xl overflow-hidden shadow-2xl mb-12 img-container relative h-72 sm:h-96">
+                    <img src="https://2.bp.blogspot.com/-zjh-3QSFgC8/TgLyplzoOmI/AAAAAAAABRc/v7cTxbBgzLQ/s1600/P6180210.JPG"
+                         alt="Panorámica de la Sierra de Callosa de Segura"
+                         onerror="this.onerror=null; this.parentElement.classList.add('img-fallback-active');"
+                         class="w-full h-full object-cover">
+                    <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-olive-700 text-cream-100 p-6 text-center">
+                        <span class="text-4xl mb-2" aria-hidden="true">⛰️</span>
+                        <h3 class="font-serif text-2xl font-bold">Sierra de Callosa de Segura</h3>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-8">
+                        <div class="text-white">
+                            <span class="px-3 py-1 rounded-full bg-olive-600 text-white text-xs font-semibold uppercase tracking-wider mb-2 inline-block">Espacio Natural Protegido</span>
+                            <h3 class="font-serif text-2xl sm:text-3xl font-bold">Sierra de Callosa de Segura</h3>
+                            <p class="text-xs sm:text-sm text-cream-100 opacity-90 max-w-xl">Imponente macizo montañoso calcáreo que abraza la ciudad y alberga especies botánicas autóctonas y vestigios prehispánicos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Routes Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16" id="routesGrid">
+                    <!-- Injected by JS -->
+                </div>
+
+                <!-- Interactive Route Planner -->
+                <div class="p-8 rounded-3xl bg-white dark:bg-earth-800 shadow-xl border border-cream-200 dark:border-earth-800">
+                    <div class="max-w-2xl">
+                        <span class="text-xs font-bold uppercase tracking-widest text-terracotta-500">Herramienta Interactiva</span>
+                        <h3 class="font-serif text-2xl font-bold mt-1 mb-2">Planificador de Visita Personalizado</h3>
+                        <p class="text-sm text-earth-800/70 dark:text-cream-100/70 mb-6">Selecciona varios lugares de interés y calcula tu itinerario óptimo para un día completo en Callosa.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="plannerCheckboxes">
+                        <!-- Checkboxes via JS -->
+                    </div>
+
+                    <button type="button" id="calcItineraryBtn" class="px-6 py-3 rounded-full bg-olive-600 hover:bg-olive-700 text-white font-semibold transition-all shadow-md">
+                        <span class="mr-2" aria-hidden="true">🗺️</span> Generar Itinerario Recomendado
+                    </button>
+
+                    <div id="itineraryResult" class="hidden mt-8 p-6 rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700">
+                        <!-- Dynamic output -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 7: MAPA INTERACTIVO (LEAFLET.JS) -->
+        <section id="mapa" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <div class="text-center max-w-3xl mx-auto mb-8">
+                    <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Herramienta Turística Interactiva</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Mapa Turístico de Callosa de Segura</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-3">Explora el municipio y su entorno, filtra puntos por categoría, consulta las fichas de cada lugar y organiza tu propia visita paso a paso.</p>
+                </div>
+
+                <!-- Map Controls: Base Layer & Status -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5 p-3.5 rounded-2xl bg-cream-100/80 dark:bg-earth-800/80 border border-cream-200 dark:border-earth-700 text-xs">
+                    <div class="flex flex-wrap items-center gap-2" id="mapLayerControls">
+                        <span class="font-bold uppercase tracking-wider text-earth-800/60 dark:text-cream-100/60 mr-1">Capa base:</span>
+                        <button type="button" data-layer="opentopo" class="mlayer-btn px-3 py-1.5 rounded-full font-semibold bg-olive-600 text-white shadow-sm transition-all">OpenTopoMap</button>
+                        <button type="button" data-layer="osm" class="mlayer-btn px-3 py-1.5 rounded-full font-semibold bg-white dark:bg-earth-900 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">OpenStreetMap</button>
+                    </div>
+                    <div id="mapLayerStatus" class="text-earth-800/75 dark:text-cream-100/75 font-medium">
+                        Capa activa: OpenTopoMap
+                    </div>
+                </div>
+
+                <!-- Map Filters -->
+                <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6" id="mapFilters">
+                    <button type="button" data-mcat="all" class="mfilter-btn active px-4 py-2 rounded-full text-xs font-semibold bg-terracotta-500 text-white shadow-sm transition-all">Todos</button>
+                    <button type="button" data-mcat="monumentos" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Monumentos</button>
+                    <button type="button" data-mcat="museos" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Museos</button>
+                    <button type="button" data-mcat="gastronomia" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Gastronomía</button>
+                    <button type="button" data-mcat="naturaleza" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Naturaleza</button>
+                    <button type="button" data-mcat="cultura" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Fiestas y cultura</button>
+                    <button type="button" data-mcat="otros" class="mfilter-btn px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-earth-800 text-earth-800 dark:text-cream-100 border border-cream-200 dark:border-earth-700 transition-all">Otros puntos de interés</button>
+                </div>
+
+                <!-- Map Legend -->
+                <div class="mb-6 p-4 rounded-2xl bg-cream-100/80 dark:bg-earth-800/80 border border-cream-200 dark:border-earth-700 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs">
+                    <span class="font-bold uppercase tracking-wider text-earth-800/60 dark:text-cream-100/60">Leyenda:</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#C86D51] inline-block"></span> Monumentos</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#2563EB] inline-block"></span> Museos</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#D97706] inline-block"></span> Gastronomía</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#4A6B5D] inline-block"></span> Naturaleza</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#9333EA] inline-block"></span> Fiestas y cultura</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-[#475569] inline-block"></span> Otros puntos de interés</span>
+                </div>
+
+                <!-- Leaflet Map Container -->
+                <div class="rounded-3xl overflow-hidden shadow-2xl border border-cream-200 dark:border-earth-800 h-[520px] sm:h-[580px] w-full z-10 relative" id="leafletMap"></div>
+
+                <!-- Descubre Callosa a tu ritmo (Rutas Temáticas) -->
+                <div id="rutasTematicas" class="mt-16 pt-12 border-t border-cream-200 dark:border-earth-800">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+                        <div class="max-w-3xl">
+                            <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Itinerarios Sugeridos</span>
+                            <h3 class="font-serif text-3xl sm:text-4xl font-bold mt-1">Descubre Callosa a tu ritmo</h3>
+                            <p class="text-earth-800/70 dark:text-cream-100/70 mt-2">Pulsa en una ruta para guardarla al instante o cárgalas en el mapa para visualizar sus paradas.</p>
+                        </div>
+                        <div class="flex flex-col items-start sm:items-end gap-2 shrink-0">
+                            <a href="#rutasGuardadas" class="px-4 py-2.5 rounded-full bg-cream-200 dark:bg-earth-800 hover:bg-terracotta-500 hover:text-white text-xs font-semibold transition-all">
+                                Ir al apartado de Rutas Guardadas (<span id="savedRoutesBadgeCount">0</span>) →
+                            </a>
+                            <span id="themedRouteFeedback" role="status" aria-live="polite" class="text-xs font-semibold text-olive-700 dark:text-amber-300"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="themedRoutesGrid">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Apartado aparte para montar y gestionar rutas guardadas sin alargar la página -->
+                <div id="rutasGuardadas" class="mt-12 p-6 sm:p-8 rounded-3xl bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-700 shadow-xl">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-6 border-b border-cream-200 dark:border-earth-700">
+                        <div>
+                            <span class="text-terracotta-500 font-semibold text-xs uppercase tracking-wider">Apartado Independiente de Rutas</span>
+                            <h3 class="font-serif text-2xl sm:text-3xl font-bold mt-1">Mis Rutas Guardadas y Montaje</h3>
+                            <p class="text-xs sm:text-sm text-earth-800/70 dark:text-cream-100/70 mt-1">Guarda rutas al hacer clic sobre ellas y monta tus itinerarios aquí mismo sin estirar el resto de la página.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input type="text" id="newRouteNameInput" placeholder="Nombre de ruta (ej. Ruta Sierra)"
+                                class="px-3.5 py-2 rounded-full bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-olive-600">
+                            <button type="button" onclick="saveCurrentCustomRouteAsNamed()" class="px-4 py-2 rounded-full bg-olive-600 hover:bg-olive-700 text-white text-xs font-semibold transition-all shadow-sm">
+                                + Guardar ruta actual
+                            </button>
+                            <button type="button" onclick="clearSavedRoutes()" class="px-4 py-2 rounded-full bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 text-xs font-semibold hover:bg-cream-300 transition-all">
+                                Limpiar guardadas
+                            </button>
+                        </div>
+                    </div>
+                    <div id="routeSystemStatus" role="status" aria-live="polite" class="mb-4 text-xs font-semibold text-olive-700 dark:text-amber-300"></div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- Lista compacta desplazable de rutas guardadas -->
+                        <div class="lg:col-span-5 space-y-2.5 max-h-72 overflow-y-auto pr-1" id="savedRoutesList">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <!-- Montaje de la ruta activa dentro de un contenedor fijo/desplazable -->
+                        <div class="lg:col-span-7 p-5 rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700" id="savedRouteBuilderPanel">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 8: PASAPORTE CALLOSINO, FAVORITOS Y TRIVIA -->
+        <section id="pasaporte" class="py-20 bg-cream-100/50 dark:bg-earth-900/50 border-t border-cream-200 dark:border-earth-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+                <div class="text-center max-w-3xl mx-auto">
+                    <span class="text-terracotta-500 font-semibold text-sm uppercase tracking-wider">Participación y Progreso</span>
+                    <h2 class="font-serif text-3xl sm:text-5xl font-bold mt-2">Mi Pasaporte Callosino</h2>
+                    <p class="text-earth-800/70 dark:text-cream-100/70 mt-3">Marca los lugares que ya has visitado, revisa tus favoritos guardados y pon a prueba lo que sabes sobre Callosa de Segura.</p>
+                </div>
+
+                <!-- Sellos del Pasaporte -->
+                <div class="bg-white dark:bg-earth-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-cream-200 dark:border-earth-700">
+                    <h3 class="font-serif text-2xl font-bold mb-6">Sellos de Visita</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="passportStampsGrid">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Favoritos y Trivia -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-5 bg-white dark:bg-earth-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-cream-200 dark:border-earth-700">
+                        <h3 class="font-serif text-2xl font-bold mb-4">Mis Lugares Favoritos</h3>
+                        <div id="favoritesList" class="space-y-3">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 bg-white dark:bg-earth-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-cream-200 dark:border-earth-700">
+                        <h3 class="font-serif text-2xl font-bold mb-4">Cuestionario de Curiosidades</h3>
+                        <div id="quizContainer">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-earth-900 text-cream-100 pt-16 pb-12 border-t border-earth-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-terracotta-500 text-white flex items-center justify-center font-serif text-xl font-bold">
+                            C
+                        </div>
+                        <span class="font-serif text-2xl font-bold tracking-tight">CALLOSA Experience</span>
+                    </div>
+                    <p class="text-sm text-cream-200/70 max-w-sm mb-4">
+                        Aplicación web guía interactiva para el descubrimiento cultural, patrimonial, natural y gastronómico del municipio de Callosa de Segura (Alicante).
+                    </p>
+                    <p class="text-xs text-cream-200/50">
+                        Fotografías oficiales e históricas procedentes del Ayuntamiento de Callosa de Segura, Wikimedia Commons y medios locales.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-serif font-bold text-lg mb-4 text-terracotta-500">Navegación</h4>
+                    <ul class="space-y-2 text-sm text-cream-200/80">
+                        <li><a href="#descubre" class="hover:text-white transition-colors">Monumentos y Museos</a></li>
+                        <li><a href="#gastronomia" class="hover:text-white transition-colors">Gastronomía Tradicional</a></li>
+                        <li><a href="#barrios" class="hover:text-white transition-colors">Barrios y Vida Local</a></li>
+                        <li><a href="#cultura" class="hover:text-white transition-colors">Cultura y Fiestas</a></li>
+                        <li><a href="#naturaleza" class="hover:text-white transition-colors">Sierra de Callosa</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-serif font-bold text-lg mb-4 text-terracotta-500">Enlaces de Interés</h4>
+                    <ul class="space-y-2 text-sm text-cream-200/80">
+                        <li><a href="https://www.callosadesegura.es" target="_blank" rel="noopener" class="hover:text-white transition-colors">Ayuntamiento de Callosa</a></li>
+                        <li><a href="#mapa" class="hover:text-white transition-colors">Mapa Turístico</a></li>
+                        <li><a href="#pasaporte" class="hover:text-white transition-colors">Pasaporte Digital</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-earth-800 text-center text-xs text-cream-200/40">
+                &copy; <span id="year"></span> Callosa Experience - Guía Turística Interactiva de Callosa de Segura. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- PLACE DETAILS MODAL -->
+    <div id="placeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-earth-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-cream-200 dark:border-earth-700 p-6 sm:p-8 relative">
+            <button type="button" id="closeModalBtn" aria-label="Cerrar modal" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/90 dark:bg-earth-900/90 shadow-lg flex items-center justify-center text-earth-800 dark:text-cream-100 hover:bg-terracotta-500 hover:text-white transition-all text-base font-bold">
+                ✕
+            </button>
+            <div id="modalContent">
+                <!-- Modal Injection -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCROLL TO TOP BUTTON -->
+    <button type="button" id="scrollToTopBtn" aria-label="Subir al inicio de la página" title="Subir"
+        class="opacity-0 pointer-events-none translate-y-3">
+        <span aria-hidden="true">↑</span>
+    </button>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. DATA SOURCES & REAL IMAGES
+        const DISHES = [
+            {
+                id: 'arroz-costra',
+                name: 'Arroz con Costra',
+                category: 'arroces',
+                image: 'https://image.ondacero.es/clipping/cmsimages01/2025/11/13/FED96EA0-4382-4B94-B39E-51A76096B218/arroz-costra_69.jpg?crop=1200%2C675%2Cx0%2Cy0&format=webply&height=720&optimize=low&width=1280',
+                desc: 'Plato emblemático de la cocina tradicional de la Vega Baja, cocinado con carnes, embutido y un característico manto superior de huevo batido cuajado al horno.'
+            },
+            {
+                id: 'bacalao-meneao',
+                name: 'Bacalao Meneao',
+                category: 'guisos',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8Kac_ruJQN2x_7848A77ZscsUiG6ZUa0epdz9Ds9kzQ&s=10',
+                desc: 'Receta tradicional elaborada con bacalao desalado, patata y ajo trabajados hasta lograr una textura cremosa y sabrosa característica de la comarca.'
+            },
+            {
+                id: 'cocido-pelotas',
+                name: 'Cocido con Pelotas',
+                category: 'guisos',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUWe25BExgVUhdwCO-lKxem8eRq1b2vY3DHH-RSKd93w&s=10',
+                desc: 'Guiso contundente de cuchara en el que destacan las tradicionales pelotas elaboradas con pan, huevo, carne, especias y aromáticos de la tierra.'
+            },
+            {
+                id: 'almojabanas',
+                name: 'Almojábanas',
+                category: 'dulces',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBVVrKW6cCkI2qvDVLElBSILGQI2PFduBkCveBouD-Zw&s=10',
+                desc: 'Dulce tradicional horneado de raíz histórica andalusí, de masa esponjosa y aroma suave a aceite de oliva, canela y azúcar.'
+            },
+            {
+                id: 'arroz-vigilia',
+                name: 'Arroz de Vigilia / Huerta',
+                category: 'arroces',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6baX97bXjPUBZ9kZqApLrGavBmgX6Zvg57A6EUoT43g&s=10',
+                desc: 'Elaboración tradicional ligada a las temporadas de cuaresma y huerta, combinando verduras frescas, legumbres o pescado con el arroz de la tierra.'
+            }
+        ];
+
+        const PLACES = [
+            {
+                id: 'san-roque',
+                title: 'Santuario de San Roque',
+                category: 'monumentos',
+                categoryLabel: 'Monumentos',
+                image: 'https://www.callosadesegura.es/wp-content/uploads/2022/06/Santuario-de-San-Roque-Edificio.jpg',
+                coords: [38.1256, -0.8808],
+                shortDesc: 'Emblemático ermitorio levantado en las faldas de la sierra en honor al patrón de la ciudad.',
+                desc: 'Construido entre 1579 y 1798, el Santuario de San Roque se ubica en un saliente privilegiado de la Sierra de Callosa. Es un edificio de estilo neoclásico barroco que alberga la imagen del santo patrón San Roque. Desde sus terrazas se divisa una impresionante panorámica de toda la huerta de la Vega Baja.',
+                schedule: 'Lunes a Domingo: 09:00 - 13:00 / 16:30 - 19:30',
+                address: 'Paraje de San Roque, s/n, Callosa de Segura',
+                source: 'Ayuntamiento de Callosa de Segura'
+            },
+            {
+                id: 'laderas-castillo',
+                title: 'Laderas del Castillo y Yacimiento Arqueológico',
+                category: 'naturaleza',
+                categoryLabel: 'Naturaleza',
+                image: 'https://www.dparquitectura.es/media/uploads/noticias/Laderas_castillo_-_DPArquitectura.jpg',
+                coords: [38.1235, -0.8820],
+                shortDesc: 'Yacimiento de la Cultura del Argar e históricas fortalezas islámicas y medievales.',
+                desc: 'Las Laderas del Castillo constituyen uno de los yacimientos arqueológicos argáricos más importantes de la Península Ibérica (Edad del Bronce). Además, en la cima perduran los restos del antiguo Castillo de Callosa (Castrum de Calusa), una fortaleza islámica defensiva de gran importancia histórica.',
+                schedule: 'Acceso libre al sendero / Visitas guiadas previa reserva',
+                address: 'Sierra de Callosa, ladera norte',
+                source: 'DP Arquitectura'
+            },
+            {
+                id: 'san-martin',
+                title: 'Iglesia Arciprestal de San Martín',
+                category: 'monumentos',
+                categoryLabel: 'Monumentos',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Portada_de_l%27esgl%C3%A9sia_de_Sant_Mart%C3%AD%2C_Callosa_de_Segura.JPG',
+                coords: [38.1228, -0.8795],
+                shortDesc: 'Joyero del renacimiento valenciano declarado Monumento Histórico-Artístico Nacional.',
+                desc: 'Iniciada en el siglo XVI en un refinado estilo renacentista tardío con amplio toque gótico, la Iglesia de San Martín destaca por su imponente portada azulada renacentista, sus cúpulas azulejadas y su campanario singular. Custodia un valiosísimo patrimonio de orfebrería e imaginería religiosa.',
+                schedule: 'Martes a Sábado: 10:00 - 12:30 / 18:00 - 20:00',
+                address: 'Plaza de España, 1',
+                source: 'Wikimedia Commons'
+            },
+            {
+                id: 'casco-antiguo',
+                title: 'Ayuntamiento y Casco Antiguo',
+                category: 'monumentos',
+                categoryLabel: 'Monumentos',
+                image: 'https://images.mnstatic.com/c9/41/c9411c4f84e71a2cc0b4456f40351557.jpg?width=1024',
+                coords: [38.1223, -0.8790],
+                shortDesc: 'Corazón histórico caracterizado por plazas tradicionales y arquitectura cívica.',
+                desc: 'Sede institucional de la Casa Consistorial articulada alrededor del trazado urbano histórico del municipio, con callejuelas tradicionales que conectan la Plaza de España con el ascensor hacia la ladera.',
+                schedule: 'Lunes a Viernes: 08:00 - 14:00',
+                address: 'Plaza de España, 1',
+                source: 'Patrimonio Municipal'
+            },
+            {
+                id: 'museo-arqueologico',
+                title: 'Museo Arqueológico Municipal',
+                category: 'museos',
+                categoryLabel: 'Museos',
+                image: 'https://www.plazatio.com/static/uploads/images/project/ep11-01-03-jpg-52d03c1b7908e9.81616594_fixw_545_365.jpg',
+                coords: [38.1221, -0.8801],
+                shortDesc: 'Colección de artefactos prehistóricos desde la Edad del Bronce y la época argárica.',
+                desc: 'Exposición permanente que recorre el devenir de la comarca desde la prehistoria, exhibiendo vasijas argáricas, enterramientos, útiles de bronce y vestigios de la ocupación romana e islámica.',
+                schedule: 'Martes a Sábado: 10:00 - 13:00',
+                address: 'Plaza Reina Sofía',
+                source: 'Plazatio Heritage'
+            },
+            {
+                id: 'museo-canamo',
+                title: 'Museo Nacional del Cáñamo',
+                category: 'museos',
+                categoryLabel: 'Museos',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Museo_del_C%C3%A1%C3%B1amo_%22Roque_Francisco_Albert_Lucas%22.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original',
+                fallbackImage: 'https://www.meer.com/attachments/b3aaafcd35325a326095f38f2c70a5fd11f7b714/store/fill/1090/613/879ccc71811f7876be8486a2ccdeff065e84d594acadc826b48516d1eb56/Roque-Albert-a-la-derecha-fundador-del-Museo-del-Canamo-muestra-una-mena-o-rueda-de-hilar.jpg',
+                coords: [38.1221, -0.8802],
+                shortDesc: 'Espacio dedicado a la memoria de la industria y artesanía hilandera textil del cáñamo.',
+                desc: 'Callosa de Segura ostenta el título honorífico de Capital del Cáñamo. Este museo muestra las herramientas tradicionales, el rastrillado, hilado y confección de cuerdas y redes, oficio artesano milenario que convirtió a Callosa en el centro hilandero referente en España.',
+                schedule: 'Martes a Viernes: 10:00 - 13:30',
+                address: 'Plaza Reina Sofía',
+                imageAlt: 'Museo Nacional del Cáñamo Roque Francisco Albert Lucas en Callosa de Segura',
+                source: 'Wikimedia Commons'
+            },
+            {
+                id: 'museo-semana-santa',
+                title: 'Museo de Semana Santa',
+                category: 'museos',
+                categoryLabel: 'Museos',
+                image: 'https://laguiaw.com/upload/servicios_94469_1321533065.jpg',
+                coords: [38.1226, -0.8798],
+                shortDesc: 'Exposición de tronos e imaginería de la Semana Santa callosina.',
+                desc: 'Espacio expositivo que reúne piezas, tronos, enseres y testimonios visuales de la Semana Santa de Callosa de Segura.',
+                schedule: 'Consultar apertura municipal y temporal',
+                address: 'Centro urbano, Callosa de Segura',
+                source: 'La Guía W'
+            },
+            {
+                id: 'glorieta-miro',
+                title: 'Glorieta Gabriel Miró y Mercado de Abastos',
+                category: 'monumentos',
+                categoryLabel: 'Monumentos',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKhM69ALf4c7yl5lPCQRDAYLCeXpqlyeQRHmI_RbT1AA&s=10',
+                coords: [38.1220, -0.8786],
+                shortDesc: 'Paseo ajardinado céntrico y entorno comercial tradicional del municipio.',
+                desc: 'Espacio público de encuentro cotidiano junto al comercio local y el abastecimiento tradicional de productos de la tierra.',
+                schedule: 'Paseo público / Horario comercial de abastos',
+                address: 'Glorieta Gabriel Miró, Callosa de Segura',
+                source: 'Archivo local'
+            },
+            {
+                id: 'la-pillarica',
+                title: 'La Pillarica (Ermita de Nuestra Señora del Pilar)',
+                category: 'monumentos',
+                categoryLabel: 'Monumentos',
+                image: 'https://www.callosadesegura.es/wp-content/uploads/2022/07/Ermita-del-Pilar-Vista-fachada.jpg',
+                coords: [38.1218, -0.8809],
+                shortDesc: 'Ermita tradicional vinculada a la devoción popular y al entorno urbano de Callosa de Segura.',
+                desc: 'La Pillarica (Ermita de Nuestra Señora del Pilar) forma parte del patrimonio devocional y vecinal de Callosa de Segura. Su fachada y entorno reflejan la arquitectura popular y el arraigo de las tradiciones locales en el municipio.',
+                schedule: 'Consultar horarios de culto y apertura local',
+                address: 'Callosa de Segura, Alicante',
+                imageAlt: 'Vista de la fachada de La Pillarica (Ermita de Nuestra Señora del Pilar) en Callosa de Segura',
+                source: 'Ayuntamiento de Callosa de Segura'
+            }
+        ];
+
+        const EXTRA_MAP_POINTS = [
+            {
+                id: 'sierra-callosa',
+                title: 'Sierra de Callosa',
+                category: 'naturaleza',
+                categoryLabel: 'Naturaleza',
+                image: 'https://2.bp.blogspot.com/-zjh-3QSFgC8/TgLyplzoOmI/AAAAAAAABRc/v7cTxbBgzLQ/s1600/P6180210.JPG',
+                coords: [38.1272, -0.8835],
+                shortDesc: 'Macizo montañoso y paraje natural con senderos y vistas de la Vega Baja.',
+                desc: 'Entorno natural de piedra caliza con rutas senderistas y miradores sobre el valle del Segura y la sierra.',
+                schedule: 'Acceso libre diurno',
+                address: 'Sierra de Callosa de Segura',
+                source: 'Archivo de naturaleza local'
+            },
+            {
+                id: 'gastronomia-centro',
+                title: 'Cocina Tradicional y Arroz con Costra',
+                category: 'gastronomia',
+                categoryLabel: 'Gastronomía',
+                image: 'https://image.ondacero.es/clipping/cmsimages01/2025/11/13/FED96EA0-4382-4B94-B39E-51A76096B218/arroz-costra_69.jpg?crop=1200%2C675%2Cx0%2Cy0&format=webply&height=720&optimize=low&width=1280',
+                coords: [38.1219, -0.8782],
+                shortDesc: 'Referencia gastronómica del núcleo urbano: arroz con costra, bacalao meneao y almojábanas.',
+                desc: 'Punto de referencia en el centro urbano para descubrir la cocina tradicional callosina vinculada a la huerta y la repostería local.',
+                schedule: 'Según establecimiento local',
+                address: 'Núcleo urbano, Callosa de Segura',
+                source: 'Gastronomía Callosa'
+            },
+            {
+                id: 'fiestas-cultura',
+                title: 'Fiestas, Semana Santa y Moros y Cristianos',
+                category: 'cultura',
+                categoryLabel: 'Fiestas y cultura',
+                image: 'https://estaticos-cdn.prensaiberica.es/clip/c8ed3df5-a0f6-4f88-a03e-b4e133456756_16-9-aspect-ratio_default_0.jpg',
+                coords: [38.1225, -0.8792],
+                shortDesc: 'Escenario festivo tradicional del centro urbano callosino.',
+                desc: 'Espacio vinculado a las celebraciones populares, desfiles y tradiciones culturales del municipio.',
+                schedule: 'Según calendario festivo anual',
+                address: 'Centro de Callosa de Segura',
+                source: 'Prensa Ibérica'
+            },
+            {
+                id: 'barrio-san-jose',
+                title: 'Barrio de San José y Entorno Urbano',
+                category: 'otros',
+                categoryLabel: 'Otros puntos de interés',
+                image: 'https://images.mnstatic.com/c9/41/c9411c4f84e71a2cc0b4456f40351557.jpg?width=1024',
+                coords: [38.1243, -0.8804],
+                shortDesc: 'Barrio tradicional en la ladera con calles escalonadas y vida vecinal.',
+                desc: 'Zona residencial tradicional próxima a la ladera de la sierra que refleja la vida cotidiana callosina.',
+                schedule: 'Acceso libre',
+                address: 'Barrio San José, Callosa de Segura',
+                source: 'Patrimonio Municipal'
+            },
+            {
+                id: 'ies-vega-baja',
+                title: 'IES Vega Baja',
+                category: 'otros',
+                categoryLabel: 'Centro Educativo',
+                image: 'https://www.micole.net/imagenes/colegio/logo/29588/vega-baja_512.png',
+                coords: [38.1215, -0.8768],
+                shortDesc: 'Centro público de Educación Secundaria, Bachillerato y Formación Profesional.',
+                desc: 'Centro educativo de referencia en Callosa de Segura y su comarca, con oferta de ESO, Bachillerato y ciclos de Formación Profesional.',
+                schedule: 'Horario lectivo y Secretaría según calendario escolar',
+                address: 'Partida Lo Gallego, Callosa de Segura',
+                source: 'Micole / Guía Callosa'
+            },
+            {
+                id: 'ies-santiago-grisolia',
+                title: 'IES Santiago Grisolía',
+                category: 'otros',
+                categoryLabel: 'Centro Educativo',
+                image: 'https://estaticos-cdn.prensaiberica.es/clip/c305c9fa-3b80-4fee-8e40-b06b18d78a20_alta-libre-aspect-ratio_default_0.jpg',
+                coords: [38.1232, -0.8788],
+                shortDesc: 'Instituto de Educación Secundaria y Bachillerato en Callosa de Segura.',
+                desc: 'Centro de Educación Secundaria y Bachillerato que lleva el nombre del bioquímico valenciano Santiago Grisolía y forma al alumnado local.',
+                schedule: 'Horario lectivo y Secretaría según calendario escolar',
+                address: 'Callosa de Segura, Alicante',
+                source: 'Prensa Ibérica'
+            }
+        ];
+
+        const ALL_MAP_POINTS = [...PLACES, ...EXTRA_MAP_POINTS];
+
+        const TRADITIONS = [
+            {
+                title: 'Semana Santa Callosina',
+                badge: 'Tradición Devocional',
+                image: 'https://estaticos-cdn.prensaiberica.es/clip/c11e71c5-5396-4bf1-a899-d635511a0d84_alta-libre-aspect-ratio_default_0.jpg',
+                imageAlt: 'Procesión de la Semana Santa Callosina frente a la fachada histórica',
+                objectPos: 'object-center',
+                desc: 'Con procesiones solemnes y cofradías históricas que llenan las calles de fervor y arte escultórico.',
+                credit: 'Prensa Ibérica'
+            },
+            {
+                title: 'Moros y Cristianos',
+                badge: 'Fiesta Popular',
+                image: 'https://estaticos-cdn.prensaiberica.es/clip/c8ed3df5-a0f6-4f88-a03e-b4e133456756_16-9-aspect-ratio_default_0.jpg',
+                imageAlt: 'Desfile festero de Moros y Cristianos en Callosa de Segura',
+                objectPos: 'object-top',
+                desc: 'Desfiles, comparsas, música festera y recreaciones que celebran la memoria histórica de la comarca.',
+                credit: 'Prensa Ibérica'
+            },
+            {
+                title: 'Oficios Tradicionales del Cáñamo',
+                badge: 'Identidad Artesanal',
+                image: 'https://estaticos-cdn.prensaiberica.es/clip/08766a63-ebcb-4107-82d3-181e495f4f04_16-9-discover-aspect-ratio_default_0_x0y578.jpg',
+                imageAlt: 'Artesana trabajando el cáñamo y la cordelería tradicional en Callosa de Segura',
+                objectPos: 'object-top',
+                desc: 'El hilado, cordelería y trabajo textil que dieron prestigio y personalidad industrial a Callosa de Segura.',
+                credit: 'Prensa Ibérica'
+            },
+            {
+                title: 'Museo y Patrimonio Cultural',
+                badge: 'Memoria Viva',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Sala_de_Tronos_Museo_Semana_Santa_Callosa_de_Segura_Jos%C3%A9_Noguera_Valverde.jpg',
+                imageAlt: 'Sala de Tronos del Museo de Semana Santa de Callosa de Segura',
+                objectPos: 'object-center',
+                desc: 'Espacios culturales y expositivos que conservan la historia, las tradiciones y el arte local.',
+                credit: 'José Noguera Valverde / Wikimedia Commons (CC BY-SA 4.0)'
+            }
+        ];
+
+        const TIMELINE = [
+            { year: 'Edad del Bronce (Cultura del Argar)', text: 'Asentamientos en las Laderas del Castillo con intensa actividad metalúrgica y organización social.' },
+            { year: 'Época Andalusí', text: 'Desarrollo de la fortaleza defensiva y sistemas de regadío en la huerta del Segura.' },
+            { year: 'Siglo XVI', text: 'Impulso renacentista en la arquitectura religiosa y consolidación del núcleo urbano.' },
+            { year: 'Siglos XIX - XX', text: 'Auge de la industria y artesanía del cáñamo, consolidando el reconocimiento como Capital del Cáñamo.' }
+        ];
+
+        const ACCORDION_ITEMS = [
+            {
+                title: 'La tradición de Partir la Vieja',
+                content: 'Costumbre popular ligada a la mitad de la Cuaresma, con participación vecinal, coplas y ambiente festivo tradicional.'
+            },
+            {
+                title: 'Fiestas Patronales en honor a San Roque',
+                content: 'Celebraciones en torno al patrón de Callosa de Segura, vinculadas al Santuario de San Roque y a la vida local.'
+            },
+            {
+                title: 'Cultura del Cáñamo y Oficios',
+                content: 'Legado artesano documentado en el Museo Nacional del Cáñamo, reflejo del trabajo de generaciones de callosinos.'
+            },
+            {
+                title: 'De Callosa a la Vega Baja, Alicante y España',
+                content: 'Callosa de Segura se integra en la comarca de la Vega Baja del Segura, en el sur de la provincia de Alicante (Comunitat Valenciana, España), conectando la huerta mediterránea y la sierra con el conjunto del territorio nacional.'
+            }
+        ];
+
+        const ROUTES = [
+            {
+                title: 'Ruta Monumental del Centro',
+                duration: 'Paseo a pie',
+                difficulty: 'Baja',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Portada_de_l%27esgl%C3%A9sia_de_Sant_Mart%C3%AD%2C_Callosa_de_Segura.JPG',
+                desc: 'Recorre la Iglesia Arciprestal de San Martín, el Casco Antiguo y la Glorieta Gabriel Miró.'
+            },
+            {
+                title: 'Ruta de Museos y Oficios',
+                duration: 'Recorrido cultural',
+                difficulty: 'Baja',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Museo_del_C%C3%A1%C3%B1amo_%22Roque_Francisco_Albert_Lucas%22.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original',
+                desc: 'Visita el Museo Arqueológico Municipal, el Museo Nacional del Cáñamo y el Museo de Semana Santa.'
+            },
+            {
+                title: 'Subida a San Roque y Laderas',
+                duration: 'Sendero de ladera',
+                difficulty: 'Media',
+                image: 'https://www.dparquitectura.es/media/uploads/noticias/Laderas_castillo_-_DPArquitectura.jpg',
+                desc: 'Asciende hacia las Laderas del Castillo y el Santuario de San Roque para disfrutar de las vistas sobre la Vega Baja.'
+            }
+        ];
+
+        const THEMED_ROUTES = [
+            {
+                id: 'ruta-historica',
+                title: 'Ruta histórica',
+                subtitle: 'Monumentos y lugares vinculados a la historia de Callosa',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Portada_de_l%27esgl%C3%A9sia_de_Sant_Mart%C3%AD%2C_Callosa_de_Segura.JPG',
+                stops: ['san-martin', 'casco-antiguo', 'laderas-castillo', 'san-roque'],
+                desc: 'Une la arquitectura religiosa de San Martín y el entorno del casco antiguo con la ladera histórica y el Santuario de San Roque.'
+            },
+            {
+                id: 'ruta-cultural',
+                title: 'Ruta cultural',
+                subtitle: 'Museos y espacios de memoria local',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Museo_del_C%C3%A1%C3%B1amo_%22Roque_Francisco_Albert_Lucas%22.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original',
+                stops: ['museo-arqueologico', 'museo-canamo', 'museo-semana-santa'],
+                desc: 'Recorrido por los espacios expositivos de arqueología, la tradición cañamera y la imaginería de Semana Santa.'
+            },
+            {
+                id: 'ruta-gastronomica',
+                title: 'Ruta gastronómica',
+                subtitle: 'Sabores tradicionales y espacios urbanos de referencia',
+                image: 'https://image.ondacero.es/clipping/cmsimages01/2025/11/13/FED96EA0-4382-4B94-B39E-51A76096B218/arroz-costra_69.jpg?crop=1200%2C675%2Cx0%2Cy0&format=webply&height=720&optimize=low&width=1280',
+                stops: ['glorieta-miro', 'gastronomia-centro', 'casco-antiguo'],
+                desc: 'Conecta la Glorieta y el entorno del mercado con la cocina tradicional callosina del arroz con costra y los dulces locales.'
+            },
+            {
+                id: 'ruta-natural',
+                title: 'Ruta natural',
+                subtitle: 'Sierra de Callosa y entorno de ladera',
+                image: 'https://2.bp.blogspot.com/-zjh-3QSFgC8/TgLyplzoOmI/AAAAAAAABRc/v7cTxbBgzLQ/s1600/P6180210.JPG',
+                stops: ['laderas-castillo', 'san-roque', 'sierra-callosa'],
+                desc: 'Aproximación a las Laderas del Castillo, el entorno de San Roque y el relieve de la Sierra de Callosa.'
+            }
+        ];
+
+        const GASTRO_TRIVIA = [
+            {
+                title: 'La costra dorada del arroz',
+                detail: 'El arroz con costra se caracteriza por su capa superior cuajada con huevo batido durante el horneado final, logrando un contraste de texturas muy apreciado en la comarca.'
+            },
+            {
+                title: 'El punto del bacalao meneao',
+                detail: 'Su nombre responde a la forma de trabajar el bacalao con patata y ajo hasta integrar los ingredientes en una preparación cremosa y sabrosa.'
+            },
+            {
+                title: 'Raíz dulce de las almojábanas',
+                detail: 'Las almojábanas forman parte del recetario dulce tradicional de raíz histórica andalusí, con masa tierna y aromas sencillos.'
+            }
+        ];
+
+        const PASSPORT_STAMPS = [
+            { id: 'sello-san-roque', name: 'Santuario de San Roque' },
+            { id: 'sello-san-martin', name: 'Iglesia de San Martín' },
+            { id: 'sello-laderas', name: 'Laderas del Castillo' },
+            { id: 'sello-canamo', name: 'Museo Nacional del Cáñamo' },
+            { id: 'sello-arqueologico', name: 'Museo Arqueológico' },
+            { id: 'sello-semana-santa', name: 'Museo de Semana Santa' },
+            { id: 'sello-glorieta', name: 'Glorieta y Mercado' },
+            { id: 'sello-sierra', name: 'Sierra de Callosa' }
+        ];
+
+        const QUIZ_QUESTIONS = [
+            {
+                q: '¿Por qué tradición artesanal es especialmente conocida Callosa de Segura?',
+                options: ['Por el cáñamo', 'Por la cerámica vidriada de Manises', 'Por la fabricación de relojes'],
+                correct: 0
+            },
+            {
+                q: '¿Qué yacimiento arqueológico prehistórico destaca en el entorno de la sierra local?',
+                options: ['Laderas del Castillo (Cultura del Argar)', 'Teatro romano de Sagunto', 'Cueva de Altamira'],
+                correct: 0
+            },
+            {
+                q: '¿Cuál de estos platos forma parte de la gastronomía tradicional de la zona?',
+                options: ['Arroz con costra', 'Fabada asturiana', 'Pulpo á feira'],
+                correct: 0
+            }
+        ];
+
+        // 2. PERSISTENT STATE
+        const STORAGE_KEY = 'callosa_experience_state_v1';
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) {
+                    return {
+                        favorites: [],
+                        stamps: [],
+                        customRoute: [],
+                        savedRoutes: [],
+                        activeSavedRouteId: null,
+                        mapOverlayVisible: false,
+                        darkMode: false
+                    };
+                }
+                const parsed = JSON.parse(raw);
+                return {
+                    favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
+                    stamps: Array.isArray(parsed.stamps) ? parsed.stamps : [],
+                    customRoute: Array.isArray(parsed.customRoute) ? parsed.customRoute : [],
+                    savedRoutes: Array.isArray(parsed.savedRoutes) ? parsed.savedRoutes : [],
+                    activeSavedRouteId: parsed.activeSavedRouteId || null,
+                    mapOverlayVisible: parsed.mapOverlayVisible !== undefined ? Boolean(parsed.mapOverlayVisible) : false,
+                    darkMode: Boolean(parsed.darkMode)
+                };
+            } catch (e) {
+                return {
+                    favorites: [],
+                    stamps: [],
+                    customRoute: [],
+                    savedRoutes: [],
+                    activeSavedRouteId: null,
+                    mapOverlayVisible: false,
+                    darkMode: false
+                };
+            }
+        }
+
+        let state = loadState();
+        let quizAnswers = {};
+        let activeOrganizedRouteId = THEMED_ROUTES[0] ? THEMED_ROUTES[0].id : '';
+        let lastRouteActionMessage = '';
+
+        function setRouteFeedback(message, isError = false) {
+            lastRouteActionMessage = message;
+            const feedbackEl = document.getElementById('themedRouteFeedback');
+            if (feedbackEl) feedbackEl.textContent = message;
+
+            const statusEl = document.getElementById('routeSystemStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = isError
+                    ? 'mb-4 text-xs font-semibold text-rose-600 dark:text-rose-400'
+                    : 'mb-4 text-xs font-semibold text-olive-700 dark:text-amber-300';
+            }
+        }
+
+        function persistAndSyncRoutes(shouldCenterMap = false) {
+            saveState();
+            updateSavedRoutesBadge();
+            renderThemedRoutes();
+            renderCustomRouteBuilder();
+            renderSavedRoutesSection();
+            renderMapMarkers(currentMapFilter);
+            if (state.mapOverlayVisible && state.customRoute.length > 0) {
+                updateCustomRoutePolyline(shouldCenterMap);
+            } else {
+                clearCustomRouteLine();
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // Ignore storage quota or privacy mode errors
+            }
+        }
+
+        function escapeHtmlAttr(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function renderSafeImage(src, alt, className = 'w-full h-full object-cover', extraAttrs = '', fallbackSrc = '') {
+            const safeSrc = escapeHtmlAttr(src || '');
+            const safeAlt = escapeHtmlAttr(alt || 'Fotografía de Callosa de Segura');
+            const safeFallback = escapeHtmlAttr(fallbackSrc || '');
+            const onErr = safeFallback
+                ? `if(!this.dataset.triedFallback){this.dataset.triedFallback='1';this.src='${safeFallback}';}else{this.onerror=null;this.parentElement.classList.add('img-fallback-active');}`
+                : `this.onerror=null;this.parentElement.classList.add('img-fallback-active');`;
+            return `
+                <img src="${safeSrc}" alt="${safeAlt}" ${extraAttrs} onerror="${onErr}" class="${className}">
+                <div class="img-fallback-placeholder w-full h-full items-center justify-center flex-col bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 p-4 text-center">
+                    <span class="text-2xl mb-1" aria-hidden="true">📷</span>
+                    <span class="text-xs font-medium">${safeAlt}</span>
+                </div>
+            `;
+        }
+
+        function findPointById(id) {
+            return ALL_MAP_POINTS.find(item => item.id === id) || null;
+        }
+
+        // 3. RENDERERS FOR PLACES, DISHES, CULTURE, ROUTES, PASSPORT & QUIZ
+        function renderPlaces(cat = 'all') {
+            const grid = document.getElementById('placesGrid');
+            if (!grid) return;
+            const list = cat === 'all' ? PLACES : PLACES.filter(p => p.category === cat);
+            grid.innerHTML = list.map(place => {
+                const isFav = state.favorites.includes(place.id);
+                const alt = place.imageAlt || `Fotografía de ${place.title} en Callosa de Segura`;
+                return `
+                    <article onclick="openPlaceModal('${escapeHtmlAttr(place.id)}')" class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all cursor-pointer group">
+                        <div>
+                            <div class="relative h-52 img-container">
+                                ${renderSafeImage(place.image, alt, 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300', '', place.fallbackImage || '')}
+                                <span class="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-earth-900/75 text-white text-[11px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                                    ${escapeHtmlAttr(place.categoryLabel || place.category)}
+                                </span>
+                                <button type="button" onclick="event.stopPropagation(); toggleFavorite('${escapeHtmlAttr(place.id)}')" aria-label="Guardar favorito" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 dark:bg-earth-900/90 flex items-center justify-center shadow text-base ${isFav ? 'text-rose-500' : 'text-earth-800/40 dark:text-cream-100/40'} hover:scale-110 transition-transform">
+                                    ♥
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="font-serif text-xl font-bold mb-2 group-hover:text-terracotta-500 transition-colors">${escapeHtmlAttr(place.title)}</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 leading-relaxed">${escapeHtmlAttr(place.shortDesc)}</p>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 pt-3 border-t border-cream-100 dark:border-earth-700/70 flex items-center justify-between gap-2 text-xs">
+                            <span class="font-bold text-terracotta-500 group-hover:underline">
+                                Ver Ficha Completa →
+                            </span>
+                            <span class="text-earth-800/50 dark:text-cream-100/50 truncate">Foto: ${escapeHtmlAttr(place.source || 'Archivo')}</span>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function renderDishes(gcat = 'all') {
+            const grid = document.getElementById('gastroGrid');
+            if (!grid) return;
+            const list = gcat === 'all' ? DISHES : DISHES.filter(d => d.category === gcat);
+            grid.innerHTML = list.map(dish => `
+                <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col hover:-translate-y-1 transition-all">
+                    <div class="h-52 img-container">
+                        ${renderSafeImage(dish.image, `Fotografía de ${dish.name}`, 'w-full h-full object-cover')}
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-xl font-bold mb-2">${escapeHtmlAttr(dish.name)}</h3>
+                            <p class="text-sm text-earth-800/70 dark:text-cream-100/70 leading-relaxed">${escapeHtmlAttr(dish.desc)}</p>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function renderGastroTrivia() {
+            const selector = document.getElementById('gastroTriviaSelector');
+            const card = document.getElementById('gastroTriviaCard');
+            if (!selector || !card) return;
+
+            selector.innerHTML = GASTRO_TRIVIA.map((item, idx) => `
+                <button type="button" data-gtrivia="${idx}" class="gtrivia-btn w-full text-left px-4 py-3 rounded-xl bg-white dark:bg-earth-900 hover:bg-terracotta-500 hover:text-white border border-cream-200 dark:border-earth-700 text-sm font-semibold transition-all">
+                    ${escapeHtmlAttr(item.title)}
+                </button>
+            `).join('');
+
+            selector.querySelectorAll('.gtrivia-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.dataset.gtrivia);
+                    const item = GASTRO_TRIVIA[idx];
+                    if (!item) return;
+                    selector.querySelectorAll('.gtrivia-btn').forEach(b => b.classList.remove('bg-terracotta-500', 'text-white'));
+                    btn.classList.add('bg-terracotta-500', 'text-white');
+                    card.innerHTML = `
+                        <span class="text-xs font-bold uppercase tracking-wider text-terracotta-500 mb-2">Sabores de Callosa</span>
+                        <h4 class="font-serif text-2xl font-bold mb-3">${escapeHtmlAttr(item.title)}</h4>
+                        <p class="text-sm text-earth-800/80 dark:text-cream-100/80 leading-relaxed">${escapeHtmlAttr(item.detail)}</p>
+                    `;
+                });
+            });
+        }
+
+        function renderTraditionsAndTimeline() {
+            const tGrid = document.getElementById('traditionsGrid');
+            if (tGrid) {
+                tGrid.innerHTML = TRADITIONS.map(t => `
+                    <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col justify-between hover:-translate-y-1 transition-all">
+                        <div>
+                            <div class="h-56 w-full img-container relative">
+                                ${renderSafeImage(t.image, t.imageAlt || t.title, `w-full h-full object-cover ${t.objectPos || 'object-center'}`)}
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block px-3 py-1 rounded-full bg-cream-200 dark:bg-earth-900 text-xs font-semibold text-terracotta-500 mb-2">${escapeHtmlAttr(t.badge)}</span>
+                                <h3 class="font-serif text-xl font-bold mb-2">${escapeHtmlAttr(t.title)}</h3>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 leading-relaxed">${escapeHtmlAttr(t.desc)}</p>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-5 pt-0 text-xs text-earth-800/50 dark:text-cream-100/50 flex items-center justify-between border-t border-cream-100 dark:border-earth-700/60 mt-2 pt-3">
+                            <span>Foto: ${escapeHtmlAttr(t.credit || 'Archivo local')}</span>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            const tl = document.getElementById('timelineContainer');
+            if (tl) {
+                tl.innerHTML = TIMELINE.map((step, i) => `
+                    <div class="relative flex items-center justify-between ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}">
+                        <div class="hidden sm:block w-5/12"></div>
+                        <div class="z-10 w-4 h-4 rounded-full bg-terracotta-500 ring-4 ring-cream-100 dark:ring-earth-800 shrink-0"></div>
+                        <div class="w-full sm:w-5/12 p-5 rounded-2xl bg-white dark:bg-earth-800 shadow border border-cream-200 dark:border-earth-700 ml-4 sm:ml-0">
+                            <span class="text-xs font-bold uppercase tracking-wider text-terracotta-500">${escapeHtmlAttr(step.year)}</span>
+                            <p class="text-sm text-earth-800/80 dark:text-cream-100/80 mt-1">${escapeHtmlAttr(step.text)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const acc = document.getElementById('cultureAccordion');
+            if (acc) {
+                acc.innerHTML = ACCORDION_ITEMS.map((item, idx) => `
+                    <div class="rounded-2xl bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-700 overflow-hidden">
+                        <button type="button" onclick="toggleAccordion(${idx})" class="w-full px-6 py-4 text-left flex items-center justify-between font-serif font-bold text-lg">
+                            <span>${escapeHtmlAttr(item.title)}</span>
+                            <span id="acc-icon-${idx}" class="text-terracotta-500">+</span>
+                        </button>
+                        <div id="acc-panel-${idx}" class="hidden px-6 pb-5 text-sm text-earth-800/75 dark:text-cream-100/75 leading-relaxed">
+                            ${escapeHtmlAttr(item.content)}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleAccordion(idx) {
+            const panel = document.getElementById(`acc-panel-${idx}`);
+            const icon = document.getElementById(`acc-icon-${idx}`);
+            if (!panel || !icon) return;
+            const isHidden = panel.classList.contains('hidden');
+            panel.classList.toggle('hidden', !isHidden);
+            icon.textContent = isHidden ? '−' : '+';
+        }
+
+        function renderRoutesAndPlanner() {
+            const rGrid = document.getElementById('routesGrid');
+            if (rGrid) {
+                rGrid.innerHTML = ROUTES.map(r => `
+                    <article class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border border-cream-200 dark:border-earth-700 overflow-hidden flex flex-col">
+                        <div class="h-48 img-container">
+                            ${renderSafeImage(r.image, r.title, 'w-full h-full object-cover')}
+                        </div>
+                        <div class="p-6 flex-grow">
+                            <div class="flex items-center justify-between text-xs font-semibold text-olive-600 mb-2">
+                                <span>${escapeHtmlAttr(r.duration)}</span>
+                                <span>Dificultad: ${escapeHtmlAttr(r.difficulty)}</span>
+                            </div>
+                            <h3 class="font-serif text-xl font-bold mb-2">${escapeHtmlAttr(r.title)}</h3>
+                            <p class="text-sm text-earth-800/70 dark:text-cream-100/70">${escapeHtmlAttr(r.desc)}</p>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            const checks = document.getElementById('plannerCheckboxes');
+            if (checks) {
+                checks.innerHTML = PLACES.map(p => `
+                    <label class="flex items-center gap-3 p-3.5 rounded-xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 cursor-pointer text-sm">
+                        <input type="checkbox" value="${escapeHtmlAttr(p.id)}" class="planner-place-cb rounded text-olive-600 focus:ring-olive-600">
+                        <span class="font-medium">${escapeHtmlAttr(p.title)}</span>
+                    </label>
+                `).join('');
+            }
+
+            const calcBtn = document.getElementById('calcItineraryBtn');
+            if (calcBtn) {
+                calcBtn.onclick = () => {
+                    const selectedIds = Array.from(document.querySelectorAll('.planner-place-cb:checked')).map(cb => cb.value);
+                    const resultBox = document.getElementById('itineraryResult');
+                    if (!resultBox) return;
+                    resultBox.classList.remove('hidden');
+                    if (selectedIds.length === 0) {
+                        resultBox.innerHTML = `<p class="text-sm text-earth-800/70 dark:text-cream-100/70">Selecciona al menos un lugar para generar tu lista de paradas.</p>`;
+                        return;
+                    }
+                    const items = selectedIds.map((id, idx) => {
+                        const place = findPointById(id);
+                        return place ? `<li class="py-1.5 flex items-center gap-2 text-sm"><span class="w-6 h-6 rounded-full bg-olive-600 text-white text-xs font-bold inline-flex items-center justify-center">${idx + 1}</span><span>${escapeHtmlAttr(place.title)}</span></li>` : '';
+                    }).join('');
+                    resultBox.innerHTML = `
+                        <h4 class="font-serif font-bold text-lg mb-3">Tu Itinerario Seleccionado</h4>
+                        <ol class="space-y-1">${items}</ol>
+                    `;
+                };
+            }
+        }
+
+        // 4. PASSPORT, FAVORITES & QUIZ
+        function updateBadges() {
+            const stampEl = document.getElementById('stampCount');
+            const favEl = document.getElementById('favCount');
+            if (stampEl) stampEl.textContent = state.stamps.length;
+            if (favEl) favEl.textContent = state.favorites.length;
+        }
+
+        function toggleFavorite(placeId) {
+            const idx = state.favorites.indexOf(placeId);
+            if (idx >= 0) {
+                state.favorites.splice(idx, 1);
+            } else {
+                state.favorites.push(placeId);
+            }
+            saveState();
+            updateBadges();
+            renderPlaces(currentPlaceFilter);
+            renderFavorites();
+        }
+
+        function toggleStamp(stampId) {
+            const idx = state.stamps.indexOf(stampId);
+            if (idx >= 0) {
+                state.stamps.splice(idx, 1);
+            } else {
+                state.stamps.push(stampId);
+            }
+            saveState();
+            updateBadges();
+            renderPassport();
+        }
+
+        function renderPassport() {
+            const grid = document.getElementById('passportStampsGrid');
+            if (!grid) return;
+            grid.innerHTML = PASSPORT_STAMPS.map(st => {
+                const active = state.stamps.includes(st.id);
+                return `
+                    <button type="button" onclick="toggleStamp('${escapeHtmlAttr(st.id)}')" class="p-4 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 ${active ? 'bg-terracotta-500/10 border-terracotta-500 text-earth-800 dark:text-cream-50' : 'bg-cream-50 dark:bg-earth-900 border-cream-200 dark:border-earth-700 opacity-75 hover:opacity-100'}">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider ${active ? 'text-terracotta-500' : 'text-earth-800/50 dark:text-cream-100/50'}">${active ? 'Sellado ✓' : 'Pendiente'}</span>
+                            <div class="font-serif font-bold text-sm mt-0.5">${escapeHtmlAttr(st.name)}</div>
+                        </div>
+                        <span class="text-xl ${active ? 'stamp-animation' : ''}" aria-hidden="true">${active ? '🏅' : '○'}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderFavorites() {
+            const box = document.getElementById('favoritesList');
+            if (!box) return;
+            if (state.favorites.length === 0) {
+                box.innerHTML = `<p class="text-sm text-earth-800/60 dark:text-cream-100/60">Aún no has guardado lugares en favoritos. Pulsa el corazón ♥ en cualquier tarjeta.</p>`;
+                return;
+            }
+            box.innerHTML = state.favorites.map(id => {
+                const place = findPointById(id);
+                if (!place) return '';
+                return `
+                    <div class="p-3.5 rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 flex items-center justify-between gap-3">
+                        <button type="button" onclick="openPlaceModal('${escapeHtmlAttr(place.id)}')" class="font-semibold text-sm text-left hover:text-terracotta-500">
+                            ${escapeHtmlAttr(place.title)}
+                        </button>
+                        <button type="button" onclick="toggleFavorite('${escapeHtmlAttr(place.id)}')" class="text-xs text-rose-600 font-semibold hover:underline">Quitar</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function scrollToFavorites() {
+            const sec = document.getElementById('pasaporte');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            if (!container) return;
+            container.innerHTML = QUIZ_QUESTIONS.map((item, qIdx) => {
+                const chosen = quizAnswers[qIdx];
+                return `
+                    <div class="mb-6 pb-6 border-b last:border-b-0 last:mb-0 last:pb-0 border-cream-200 dark:border-earth-700">
+                        <p class="font-semibold text-sm sm:text-base mb-3">${qIdx + 1}. ${escapeHtmlAttr(item.q)}</p>
+                        <div class="space-y-2">
+                            ${item.options.map((opt, oIdx) => {
+                                let cls = 'bg-cream-50 dark:bg-earth-900 border-cream-200 dark:border-earth-700 hover:border-terracotta-500';
+                                if (chosen !== undefined) {
+                                    if (oIdx === item.correct) cls = 'bg-olive-600/15 border-olive-600 font-semibold';
+                                    else if (oIdx === chosen) cls = 'bg-rose-500/15 border-rose-500';
+                                }
+                                return `
+                                    <button type="button" onclick="answerQuiz(${qIdx}, ${oIdx})" class="w-full text-left px-4 py-2.5 rounded-xl border text-xs sm:text-sm transition-all ${cls}">
+                                        ${escapeHtmlAttr(opt)}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function answerQuiz(qIdx, oIdx) {
+            quizAnswers[qIdx] = oIdx;
+            renderQuiz();
+        }
+
+        // 5. PLACE MODAL
+        function refreshPlaceModalActionButton(placeId) {
+            const btn = document.getElementById('modalToggleRouteBtn');
+            if (!btn) return;
+            const inRoute = state.customRoute.includes(placeId);
+            btn.textContent = inRoute ? 'Quitar de ruta ✓' : '+ Añadir ruta y marcar en mapa';
+            btn.classList.toggle('bg-amber-600', inRoute);
+            btn.classList.toggle('hover:bg-amber-700', inRoute);
+            btn.classList.toggle('bg-olive-600', !inRoute);
+            btn.classList.toggle('hover:bg-olive-700', !inRoute);
+        }
+
+        function openPlaceModal(placeId) {
+            const place = findPointById(placeId);
+            const modal = document.getElementById('placeModal');
+            const content = document.getElementById('modalContent');
+            if (!place || !modal || !content) return;
+
+            const alt = place.imageAlt || `Fotografía de ${place.title} en Callosa de Segura`;
+            const inRoute = state.customRoute.includes(place.id);
+            const isEducationalCenter = place.categoryLabel === 'Centro Educativo' || place.category === 'colegios' || place.id.startsWith('ies-');
+
+            content.innerHTML = `
+                <div class="h-60 sm:h-72 rounded-2xl overflow-hidden mb-6 img-container">
+                    ${renderSafeImage(place.image, alt, 'w-full h-full object-cover', '', place.fallbackImage || '')}
+                </div>
+                <span class="inline-block px-3 py-1 rounded-full bg-terracotta-500/10 text-terracotta-500 text-xs font-bold uppercase tracking-wider mb-2">
+                    ${escapeHtmlAttr(place.categoryLabel || place.category)}
+                </span>
+                <h3 class="font-serif text-2xl sm:text-3xl font-bold mb-3">${escapeHtmlAttr(place.title)}</h3>
+                <p class="text-sm text-earth-800/80 dark:text-cream-100/80 leading-relaxed mb-5">${escapeHtmlAttr(place.desc)}</p>
+                <div class="p-4 rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs space-y-1.5 mb-6">
+                    <div><strong>Ubicación:</strong> ${escapeHtmlAttr(place.address || 'Callosa de Segura, Alicante')}</div>
+                    <div><strong>Horario / Acceso:</strong> ${escapeHtmlAttr(place.schedule || 'Consultar información local')}</div>
+                    <div><strong>Fuente:</strong> ${escapeHtmlAttr(place.source || 'Guía Callosa')}</div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    ${!isEducationalCenter ? `
+                    <button type="button" id="modalToggleRouteBtn" onclick="toggleStopInCustomRouteFromMap('${escapeHtmlAttr(place.id)}', this); refreshPlaceModalActionButton('${escapeHtmlAttr(place.id)}');" class="px-5 py-2.5 rounded-full ${inRoute ? 'bg-amber-600 hover:bg-amber-700' : 'bg-olive-600 hover:bg-olive-700'} text-white text-xs font-semibold transition-all">
+                        ${inRoute ? 'Quitar de ruta ✓' : '+ Añadir ruta y marcar en mapa'}
+                    </button>
+                    ` : ''}
+                    <a href="#mapa" onclick="closePlaceModal(); centerRouteOnMap();" class="px-5 py-2.5 rounded-full bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 text-xs font-semibold hover:bg-cream-300 transition-all">
+                        Ver en el mapa
+                    </a>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePlaceModal() {
+            const modal = document.getElementById('placeModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // 6. LEAFLET MAP WITH GITHUB PAGES COMPATIBLE BASE LAYERS & FALLBACKS
+        let map = null;
+        let mapMarkers = [];
+        let routeOrderMarkers = [];
+        let customRoutePolyline = null;
+        let currentMapFilter = 'all';
+        let currentBaseLayerKey = 'opentopo';
+        let baseLayers = {};
+        let tileErrorCount = 0;
+
+        // Configure referrer policy compatible with GitHub Pages and tile servers
+        if (typeof L !== 'undefined' && L.TileLayer && L.TileLayer.prototype && L.TileLayer.prototype.options) {
+            L.TileLayer.prototype.options.referrerPolicy = 'strict-origin-when-cross-origin';
+        }
+
+        const LAYER_CONFIGS = {
+            opentopo: {
+                label: 'OpenTopoMap',
+                url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+                options: {
+                    subdomains: 'abc',
+                    maxZoom: 17,
+                    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, SRTM | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+                }
+            },
+            osm: {
+                label: 'OpenStreetMap',
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: {
+                    subdomains: 'abc',
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                }
+            }
+        };
+
+        function updateLayerStatusText(text) {
+            const statusEl = document.getElementById('mapLayerStatus');
+            if (statusEl) statusEl.textContent = text;
+        }
+
+        function highlightLayerButtons(activeKey) {
+            document.querySelectorAll('.mlayer-btn').forEach(btn => {
+                const isSelected = btn.dataset.layer === activeKey;
+                btn.classList.toggle('bg-olive-600', isSelected);
+                btn.classList.toggle('text-white', isSelected);
+                btn.classList.toggle('shadow-sm', isSelected);
+                btn.classList.toggle('bg-white', !isSelected);
+                btn.classList.toggle('dark:bg-earth-900', !isSelected);
+                btn.classList.toggle('text-earth-800', !isSelected);
+                btn.classList.toggle('dark:text-cream-100', !isSelected);
+            });
+        }
+
+        function switchMapBaseLayer(layerKey, isAutomaticFallback = false) {
+            if (!map || !LAYER_CONFIGS[layerKey]) return;
+
+            Object.values(baseLayers).forEach(layer => {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            if (!baseLayers[layerKey]) {
+                const cfg = LAYER_CONFIGS[layerKey];
+                const tl = L.tileLayer(cfg.url, cfg.options);
+                tl.on('tileerror', () => {
+                    tileErrorCount += 1;
+                    if (layerKey === 'opentopo' && tileErrorCount >= 4) {
+                        tileErrorCount = 0;
+                        switchMapBaseLayer('osm', true);
+                    }
+                });
+                tl.on('tileload', () => {
+                    if (tileErrorCount > 0) tileErrorCount = 0;
+                });
+                baseLayers[layerKey] = tl;
+            }
+
+            currentBaseLayerKey = layerKey;
+            baseLayers[layerKey].addTo(map);
+            highlightLayerButtons(layerKey);
+
+            if (isAutomaticFallback) {
+                updateLayerStatusText(`Respaldo activo: ${LAYER_CONFIGS[layerKey].label}`);
+            } else {
+                updateLayerStatusText(`Capa activa: ${LAYER_CONFIGS[layerKey].label}`);
+            }
+        }
+
+        function createCategoryMarkerIcon(category) {
+            const palette = {
+                monumentos: { bg: '#C86D51', symbol: '🏛️' },
+                museos: { bg: '#2563EB', symbol: '🖼️' },
+                gastronomia: { bg: '#D97706', symbol: '🍲' },
+                naturaleza: { bg: '#4A6B5D', symbol: '⛰️' },
+                cultura: { bg: '#9333EA', symbol: '🎭' },
+                otros: { bg: '#475569', symbol: '📍' }
+            };
+            const style = palette[category] || palette.otros;
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="map-pin-badge" style="background-color: ${style.bg};" title="${escapeHtmlAttr(category)}"><span aria-hidden="true">${style.symbol}</span></div>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -17]
+            });
+        }
+
+        function renderMapMarkers(catFilter = 'all') {
+            if (!map) return;
+            currentMapFilter = catFilter;
+
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+
+            const filtered = catFilter === 'all'
+                ? ALL_MAP_POINTS
+                : ALL_MAP_POINTS.filter(p => p.category === catFilter);
+
+            filtered.forEach(place => {
+                const marker = L.marker(place.coords, { icon: createCategoryMarkerIcon(place.category) }).addTo(map);
+                const altText = place.imageAlt || `Fotografía de ${place.title} en Callosa de Segura`;
+                const catName = place.categoryLabel || place.category;
+                const inCustomRoute = state.customRoute.includes(place.id);
+                const isEducationalCenter = place.categoryLabel === 'Centro Educativo' || place.category === 'colegios' || place.id.startsWith('ies-');
+                const fallbackUrl = place.fallbackImage || 'https://placehold.co/400x250/FAF6EE/2C2523?text=Imagen+no+disponible';
+
+                const popupHTML = `
+                    <div class="p-1.5 w-[248px]">
+                        <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-terracotta-500 mb-1.5">${escapeHtmlAttr(catName)}</span>
+                        <div class="w-full h-28 rounded-xl overflow-hidden bg-cream-200 dark:bg-earth-900 mb-2.5 border border-cream-200 dark:border-earth-700">
+                            <img src="${escapeHtmlAttr(place.image)}" alt="${escapeHtmlAttr(altText)}" data-fallback="${escapeHtmlAttr(fallbackUrl)}" onerror="if(!this.dataset.triedFallback && this.dataset.fallback){this.dataset.triedFallback='1';this.src=this.dataset.fallback;}else{this.onerror=null;this.src='https://placehold.co/400x250/FAF6EE/2C2523?text=Imagen+no+disponible';}" class="w-full h-full object-cover">
+                        </div>
+                        <h4 class="font-serif font-bold text-sm leading-snug mb-1">${escapeHtmlAttr(place.title)}</h4>
+                        <p class="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed mb-3">${escapeHtmlAttr(place.shortDesc)}</p>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="openPlaceModal('${escapeHtmlAttr(place.id)}')" class="text-[11px] bg-terracotta-500 hover:bg-terracotta-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors">Ver ficha</button>
+                            ${!isEducationalCenter ? `
+                                <button type="button" onclick="toggleStopInCustomRouteFromMap('${escapeHtmlAttr(place.id)}', this)" class="text-[11px] ${inCustomRoute ? 'bg-amber-600 hover:bg-amber-700' : 'bg-olive-600 hover:bg-olive-700'} text-white px-2.5 py-1.5 rounded-lg font-bold transition-colors">
+                                    ${inCustomRoute ? 'Quitar ruta ✓' : '+ Ruta'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                marker.bindPopup(popupHTML, { maxWidth: 270 });
+                marker.on('popupopen', () => {
+                    marker._isPopupOpen = true;
+                });
+                marker.on('popupclose', () => {
+                    marker._isPopupOpen = false;
+                });
+                mapMarkers.push(marker);
+            });
+        }
+
+        function initMap() {
+            const mapContainer = document.getElementById('leafletMap');
+            if (!mapContainer || typeof L === 'undefined') return;
+
+            map = L.map('leafletMap', {
+                center: [38.12268, -0.87933],
+                zoom: 15,
+                scrollWheelZoom: false
+            });
+
+            switchMapBaseLayer('opentopo', false);
+            renderMapMarkers(currentMapFilter);
+
+            document.querySelectorAll('.mlayer-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tileErrorCount = 0;
+                    switchMapBaseLayer(btn.dataset.layer, false);
+                });
+            });
+
+            document.querySelectorAll('.mfilter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mfilter-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-terracotta-500', 'text-white');
+                        b.classList.add('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    });
+                    btn.classList.add('active', 'bg-terracotta-500', 'text-white');
+                    btn.classList.remove('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    renderMapMarkers(btn.dataset.mcat);
+                });
+            });
+
+            // Draw existing polyline silently without changing current viewport
+            updateCustomRoutePolyline(false);
+        }
+
+        // 7. THEMED ROUTES ("DESCUBRE CALLOSA A TU RITMO") & CUSTOM ROUTE BUILDER
+        function updateSavedRoutesBadge() {
+            const badge = document.getElementById('savedRoutesBadgeCount');
+            if (badge) badge.textContent = String(state.savedRoutes.length);
+        }
+
+        function saveThemedRouteOnClick(routeId, event) {
+            if (event) event.stopPropagation();
+            const route = THEMED_ROUTES.find(r => r.id === routeId);
+            if (!route) {
+                setRouteFeedback('No se ha encontrado la ruta seleccionada.', true);
+                return;
+            }
+
+            activeOrganizedRouteId = route.id;
+            state.mapOverlayVisible = true;
+
+            const existingIdx = state.savedRoutes.findIndex(sr => sr.sourceId === route.id);
+            if (existingIdx >= 0) {
+                const removedEntry = state.savedRoutes[existingIdx];
+                state.savedRoutes.splice(existingIdx, 1);
+                if (state.activeSavedRouteId === removedEntry.id) {
+                    state.activeSavedRouteId = state.savedRoutes[0] ? state.savedRoutes[0].id : null;
+                }
+                if (state.activeSavedRouteId) {
+                    const nextSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+                    state.customRoute = nextSaved ? [...nextSaved.stops] : [];
+                } else {
+                    state.customRoute = [];
+                }
+                setRouteFeedback(`"${route.title}" eliminada de Rutas guardadas.`);
+            } else {
+                state.customRoute = [...route.stops];
+                const savedEntry = {
+                    id: `saved-${route.id}-${Date.now()}`,
+                    sourceId: route.id,
+                    title: route.title,
+                    subtitle: route.subtitle,
+                    stops: [...route.stops],
+                    updatedAt: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                };
+                state.savedRoutes.unshift(savedEntry);
+                state.activeSavedRouteId = savedEntry.id;
+                setRouteFeedback(`"${route.title}" guardada y cargada en el mapa.`);
+            }
+
+            persistAndSyncRoutes(true);
+        }
+
+        function toggleStopInCustomRouteFromMap(placeId, btnEl = null) {
+            const place = findPointById(placeId);
+            if (!place) {
+                setRouteFeedback('No se ha encontrado el punto seleccionado en el mapa.', true);
+                return;
+            }
+
+            state.mapOverlayVisible = true;
+            const idx = state.customRoute.indexOf(placeId);
+            const nowInRoute = idx < 0;
+
+            if (idx >= 0) {
+                state.customRoute.splice(idx, 1);
+
+                if (state.activeSavedRouteId) {
+                    const activeSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+                    if (activeSaved) {
+                        activeSaved.stops = activeSaved.stops.filter(id => id !== placeId);
+                    }
+                }
+                setRouteFeedback(`"${place.title}" quitada de la ruta.`);
+            } else {
+                state.customRoute.push(placeId);
+
+                if (state.activeSavedRouteId) {
+                    const activeSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+                    if (activeSaved && !activeSaved.stops.includes(placeId)) {
+                        activeSaved.stops.push(placeId);
+                        activeSaved.updatedAt = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    }
+                } else {
+                    const autoRoute = {
+                        id: `saved-map-${Date.now()}`,
+                        sourceId: 'map-selection',
+                        title: 'Mi ruta en el mapa',
+                        subtitle: 'Puntos seleccionados desde el mapa',
+                        stops: [...state.customRoute],
+                        updatedAt: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                    };
+                    state.savedRoutes.unshift(autoRoute);
+                    state.activeSavedRouteId = autoRoute.id;
+                }
+                setRouteFeedback(`"${place.title}" añadida a la ruta y marcada en el mapa.`);
+            }
+
+            saveState();
+            updateSavedRoutesBadge();
+            renderThemedRoutes();
+            renderCustomRouteBuilder();
+            renderSavedRoutesSection();
+
+            if (btnEl) {
+                const isModalBtn = btnEl.id === 'modalToggleRouteBtn';
+                if (isModalBtn) {
+                    btnEl.textContent = nowInRoute ? 'Quitar de ruta ✓' : '+ Añadir ruta y marcar en mapa';
+                } else {
+                    btnEl.textContent = nowInRoute ? 'Quitar ruta ✓' : '+ Ruta';
+                }
+                btnEl.classList.toggle('bg-amber-600', nowInRoute);
+                btnEl.classList.toggle('hover:bg-amber-700', nowInRoute);
+                btnEl.classList.toggle('bg-olive-600', !nowInRoute);
+                btnEl.classList.toggle('hover:bg-olive-700', !nowInRoute);
+            }
+
+            refreshPlaceModalActionButton(placeId);
+
+            if (state.customRoute.length === 0) {
+                clearCustomRouteLine();
+            } else {
+                updateCustomRoutePolyline(false);
+            }
+        }
+
+        function deleteSavedRoute(savedId) {
+            const target = state.savedRoutes.find(r => r.id === savedId);
+            state.savedRoutes = state.savedRoutes.filter(r => r.id !== savedId);
+            if (state.activeSavedRouteId === savedId) {
+                state.activeSavedRouteId = state.savedRoutes[0] ? state.savedRoutes[0].id : null;
+                const fallbackRoute = state.savedRoutes[0];
+                state.customRoute = fallbackRoute ? [...fallbackRoute.stops] : [];
+            }
+            setRouteFeedback(target ? `"${target.title}" eliminada.` : 'Ruta eliminada.');
+            persistAndSyncRoutes(state.customRoute.length > 0 && state.mapOverlayVisible);
+        }
+
+        function clearSavedRoutes() {
+            state.savedRoutes = [];
+            state.activeSavedRouteId = null;
+            state.customRoute = [];
+            setRouteFeedback('Todas las rutas guardadas han sido eliminadas.');
+            persistAndSyncRoutes(false);
+        }
+
+        function addStopToActiveSavedRoute(placeId) {
+            if (!placeId || !findPointById(placeId)) {
+                setRouteFeedback('Selecciona un lugar válido para añadir a la ruta.', true);
+                return;
+            }
+            const place = findPointById(placeId);
+            let activeEntry = state.savedRoutes.find(r => r.id === state.activeSavedRouteId) || state.savedRoutes[0];
+
+            if (!activeEntry) {
+                activeEntry = {
+                    id: `saved-custom-${Date.now()}`,
+                    sourceId: 'custom',
+                    title: 'Mi ruta guardada',
+                    subtitle: 'Ruta montada en el apartado independiente',
+                    stops: [placeId],
+                    updatedAt: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                };
+                state.savedRoutes.unshift(activeEntry);
+                state.activeSavedRouteId = activeEntry.id;
+                state.customRoute = [...activeEntry.stops];
+                state.mapOverlayVisible = true;
+                setRouteFeedback(`Creada "${activeEntry.title}" con ${place.title} y marcada en el mapa.`);
+                persistAndSyncRoutes(true);
+                return;
+            }
+
+            state.activeSavedRouteId = activeEntry.id;
+            if (activeEntry.stops.includes(placeId)) {
+                state.customRoute = [...activeEntry.stops];
+                state.mapOverlayVisible = true;
+                setRouteFeedback(`"${place.title}" ya está en "${activeEntry.title}". Centrando en el mapa.`);
+                persistAndSyncRoutes(true);
+                return;
+            }
+
+            activeEntry.stops.push(placeId);
+            activeEntry.updatedAt = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            state.customRoute = [...activeEntry.stops];
+            state.mapOverlayVisible = true;
+            setRouteFeedback(`Añadido "${place.title}" a "${activeEntry.title}" y marcado en el mapa.`);
+            persistAndSyncRoutes(true);
+        }
+
+        function moveStopInActiveSavedRoute(index, delta) {
+            const entry = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+            if (!entry) return;
+            const target = index + delta;
+            if (index < 0 || index >= entry.stops.length || target < 0 || target >= entry.stops.length) return;
+            const tmp = entry.stops[index];
+            entry.stops[index] = entry.stops[target];
+            entry.stops[target] = tmp;
+            state.customRoute = [...entry.stops];
+            state.mapOverlayVisible = true;
+            setRouteFeedback(`Orden actualizado en "${entry.title}".`);
+            persistAndSyncRoutes(true);
+        }
+
+        function removeStopFromActiveSavedRoute(index) {
+            const entry = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+            if (!entry || index < 0 || index >= entry.stops.length) return;
+            entry.stops.splice(index, 1);
+            state.customRoute = [...entry.stops];
+            setRouteFeedback(`Parada eliminada de "${entry.title}".`);
+            persistAndSyncRoutes(state.customRoute.length > 0 && state.mapOverlayVisible);
+        }
+
+        function renderSavedRoutesSection() {
+            const listEl = document.getElementById('savedRoutesList');
+            const panelEl = document.getElementById('savedRouteBuilderPanel');
+            if (!listEl || !panelEl) return;
+
+            if (state.savedRoutes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="p-4 rounded-2xl bg-cream-50 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs text-earth-800/70 dark:text-cream-100/70">
+                        Haz clic en cualquiera de las rutas temáticas superiores para guardarla aquí automáticamente, o pulsa <strong>+ Guardar ruta actual</strong>.
+                    </div>
+                `;
+                panelEl.innerHTML = `
+                    <div class="text-center py-8 text-xs text-earth-800/60 dark:text-cream-100/60">
+                        Sin rutas guardadas todavía. Selecciona o guarda una ruta para montarla y reordenar sus paradas.
+                    </div>
+                `;
+                return;
+            }
+
+            if (!state.savedRoutes.some(r => r.id === state.activeSavedRouteId)) {
+                state.activeSavedRouteId = state.savedRoutes[0].id;
+            }
+
+            listEl.innerHTML = state.savedRoutes.map(entry => {
+                const isSelected = entry.id === state.activeSavedRouteId;
+                return `
+                    <div onclick="selectSavedRoute('${escapeHtmlAttr(entry.id)}')" class="p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between gap-3 ${isSelected ? 'bg-terracotta-500/10 border-terracotta-500' : 'bg-cream-50 dark:bg-earth-900 border-cream-200 dark:border-earth-700 hover:border-olive-600'}">
+                        <div class="min-w-0">
+                            <div class="font-serif font-bold text-sm truncate">${escapeHtmlAttr(entry.title)}</div>
+                            <div class="text-[11px] text-earth-800/65 dark:text-cream-100/65">${entry.stops.length} paradas · Guardada ${escapeHtmlAttr(entry.updatedAt || '')}</div>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation(); deleteSavedRoute('${escapeHtmlAttr(entry.id)}')" aria-label="Eliminar ruta guardada" class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white text-xs font-bold shrink-0">✕</button>
+                    </div>
+                `;
+            }).join('');
+
+            const activeEntry = state.savedRoutes.find(r => r.id === state.activeSavedRouteId) || state.savedRoutes[0];
+            const stopsHtml = activeEntry.stops.length === 0
+                ? `<p class="text-xs text-earth-800/60 dark:text-cream-100/60 py-4 text-center">Esta ruta no tiene paradas. Añade lugares desde el selector de abajo.</p>`
+                : activeEntry.stops.map((stopId, idx) => {
+                    const pt = findPointById(stopId);
+                    if (!pt) return '';
+                    return `
+                        <div class="p-2.5 rounded-xl bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-700 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-5 h-5 rounded-full bg-terracotta-500 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">${idx + 1}</span>
+                                <span class="text-xs font-semibold truncate">${escapeHtmlAttr(pt.title)}</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="moveStopInActiveSavedRoute(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} aria-label="Subir parada en ruta guardada" class="w-6 h-6 rounded bg-cream-100 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs font-bold disabled:opacity-30">↑</button>
+                                <button type="button" onclick="moveStopInActiveSavedRoute(${idx}, 1)" ${idx === activeEntry.stops.length - 1 ? 'disabled' : ''} aria-label="Bajar parada en ruta guardada" class="w-6 h-6 rounded bg-cream-100 dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs font-bold disabled:opacity-30">↓</button>
+                                <button type="button" onclick="removeStopFromActiveSavedRoute(${idx})" aria-label="Quitar parada de ruta guardada" class="w-6 h-6 rounded bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white text-xs font-bold">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            const addOptions = ALL_MAP_POINTS.map(pt =>
+                `<option value="${escapeHtmlAttr(pt.id)}">${escapeHtmlAttr(pt.title)}</option>`
+            ).join('');
+
+            panelEl.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div>
+                        <h4 class="font-serif font-bold text-lg">${escapeHtmlAttr(activeEntry.title)}</h4>
+                        <p class="text-[11px] text-earth-800/65 dark:text-cream-100/65">${escapeHtmlAttr(activeEntry.subtitle || '')}</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="applySavedRouteToCustom('${escapeHtmlAttr(activeEntry.id)}')" class="px-3.5 py-1.5 rounded-full bg-olive-600 hover:bg-olive-700 text-white text-xs font-semibold transition-all">
+                            Marcar en mapa
+                        </button>
+                        <button type="button" onclick="toggleMapOverlayVisibility()" class="px-3.5 py-1.5 rounded-full bg-cream-200 dark:bg-earth-800 text-earth-800 dark:text-cream-100 text-xs font-semibold hover:bg-cream-300 transition-all">
+                            ${state.mapOverlayVisible ? 'Ocultar trazado' : 'Mostrar trazado'}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-2 max-h-40 overflow-y-auto pr-1 mb-4">
+                    ${stopsHtml}
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-cream-200 dark:border-earth-700">
+                    <select id="addStopToSavedSelect" class="flex-1 min-w-[180px] px-3 py-2 rounded-xl bg-white dark:bg-earth-800 border border-cream-200 dark:border-earth-700 text-xs font-medium">
+                        ${addOptions}
+                    </select>
+                    <button type="button" onclick="const sel = document.getElementById('addStopToSavedSelect'); if(sel) addStopToActiveSavedRoute(sel.value);" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition-all">
+                        + Añadir parada
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderThemedRoutes() {
+            const grid = document.getElementById('themedRoutesGrid');
+            if (!grid) return;
+
+            grid.innerHTML = THEMED_ROUTES.map(route => {
+                const isSaved = state.savedRoutes.some(sr => sr.sourceId === route.id);
+                const isSelected = activeOrganizedRouteId === route.id;
+                const stopLabels = route.stops.map((id, index) => {
+                    const p = findPointById(id);
+                    const name = p ? p.title : id;
+                    return `<li class="text-xs text-earth-800/80 dark:text-cream-100/80 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-terracotta-500/15 text-terracotta-500 font-bold inline-flex items-center justify-center text-[11px]">${index + 1}</span><span>${escapeHtmlAttr(name)}</span></li>`;
+                }).join('');
+
+                return `
+                    <article onclick="saveThemedRouteOnClick('${escapeHtmlAttr(route.id)}', event)" class="rounded-3xl bg-white dark:bg-earth-800 shadow-lg border ${isSelected ? 'border-olive-600 ring-2 ring-olive-600/30' : 'border-cream-200 dark:border-earth-700'} overflow-hidden flex flex-col justify-between cursor-pointer hover:-translate-y-0.5 transition-all">
+                        <div>
+                            <div class="h-48 img-container relative">
+                                ${renderSafeImage(route.image, route.title, 'w-full h-full object-cover')}
+                                <button type="button" onclick="saveThemedRouteOnClick('${escapeHtmlAttr(route.id)}', event)" class="absolute top-3 right-3 px-3 py-1 rounded-full text-[11px] font-bold shadow transition-all ${isSaved ? 'bg-olive-600 text-white' : 'bg-white/95 dark:bg-earth-900/95 text-earth-800 dark:text-cream-100 hover:bg-terracotta-500 hover:text-white'}">
+                                    ${isSaved ? 'Guardada ✓ (Quitar)' : 'Clic para guardar'}
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-terracotta-500">${escapeHtmlAttr(route.subtitle)}</span>
+                                <h4 class="font-serif text-2xl font-bold mt-1 mb-2">${escapeHtmlAttr(route.title)}</h4>
+                                <p class="text-sm text-earth-800/70 dark:text-cream-100/70 mb-4">${escapeHtmlAttr(route.desc)}</p>
+                                <ol class="space-y-1.5">${stopLabels}</ol>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 pt-3 border-t border-cream-100 dark:border-earth-700/70 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="event.stopPropagation(); saveThemedRouteOnClick('${escapeHtmlAttr(route.id)}', event)" class="px-4 py-2 rounded-full bg-olive-600 hover:bg-olive-700 text-white text-xs font-semibold transition-all">
+                                    ${isSaved ? 'Guardada en tu ruta ✓' : 'Guardar en mi ruta'}
+                                </button>
+                                <button type="button" onclick="event.stopPropagation(); focusThemedRouteOnMap('${escapeHtmlAttr(route.id)}')" class="px-4 py-2 rounded-full bg-cream-200 dark:bg-earth-900 text-earth-800 dark:text-cream-100 text-xs font-semibold hover:bg-cream-300 transition-all">
+                                    Ver en el mapa
+                                </button>
+                            </div>
+                            ${isSelected && lastRouteActionMessage ? `<span class="text-[11px] font-semibold text-olive-700 dark:text-cream-100">${escapeHtmlAttr(lastRouteActionMessage)}</span>` : ''}
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function loadThemedRouteIntoCustom(routeId) {
+            const route = THEMED_ROUTES.find(r => r.id === routeId);
+            if (!route) return;
+            activeOrganizedRouteId = route.id;
+            state.customRoute = [...route.stops];
+            saveState();
+            renderCustomRouteBuilder();
+            updateCustomRoutePolyline(false);
+        }
+
+        function appendThemedRouteIntoCustom(routeId) {
+            const route = THEMED_ROUTES.find(r => r.id === routeId);
+            if (!route) return;
+            activeOrganizedRouteId = route.id;
+            route.stops.forEach(stopId => {
+                if (findPointById(stopId) && !state.customRoute.includes(stopId)) {
+                    state.customRoute.push(stopId);
+                }
+            });
+            saveState();
+            renderCustomRouteBuilder();
+            updateCustomRoutePolyline(false);
+        }
+
+        function focusThemedRouteOnMap(routeId) {
+            const route = THEMED_ROUTES.find(r => r.id === routeId);
+            if (!route || !map) return;
+            const latLngs = route.stops
+                .map(id => findPointById(id))
+                .filter(Boolean)
+                .map(p => p.coords);
+            if (latLngs.length === 0) return;
+
+            if (customRoutePolyline) {
+                map.removeLayer(customRoutePolyline);
+            }
+            customRoutePolyline = L.polyline(latLngs, {
+                color: '#C86D51',
+                weight: 4,
+                opacity: 0.9,
+                dashArray: '8, 6'
+            }).addTo(map);
+
+            map.fitBounds(L.latLngBounds(latLngs).pad(0.2));
+            const mapEl = document.getElementById('leafletMap');
+            if (mapEl) mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function updateCustomRoutePolyline(shouldFitBounds = false) {
+            if (!map) return;
+            if (customRoutePolyline) {
+                map.removeLayer(customRoutePolyline);
+                customRoutePolyline = null;
+            }
+            routeOrderMarkers.forEach(m => map.removeLayer(m));
+            routeOrderMarkers = [];
+
+            if (!state.mapOverlayVisible || state.customRoute.length === 0) {
+                return;
+            }
+
+            const orderedPoints = state.customRoute
+                .map(id => findPointById(id))
+                .filter(Boolean);
+
+            const latLngs = orderedPoints.map(p => p.coords);
+
+            orderedPoints.forEach((pt, idx) => {
+                const badge = L.marker(pt.coords, {
+                    interactive: false,
+                    zIndexOffset: 500,
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class="route-order-badge">${idx + 1}</div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    })
+                }).addTo(map);
+                routeOrderMarkers.push(badge);
+            });
+
+            if (latLngs.length >= 2) {
+                customRoutePolyline = L.polyline(latLngs, {
+                    color: '#C86D51',
+                    weight: 4.5,
+                    opacity: 0.92
+                }).addTo(map);
+            }
+
+            if (shouldFitBounds && latLngs.length > 0) {
+                map.invalidateSize();
+                if (latLngs.length === 1) {
+                    map.setView(latLngs[0], 16);
+                } else {
+                    map.fitBounds(L.latLngBounds(latLngs).pad(0.22));
+                }
+            }
+        }
+
+        function centerRouteOnMap() {
+            if (!map) return;
+            const mapEl = document.getElementById('leafletMap');
+            if (mapEl) {
+                mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            const latLngs = state.customRoute
+                .map(id => findPointById(id))
+                .filter(Boolean)
+                .map(p => p.coords);
+            if (latLngs.length === 0) {
+                updateCustomRoutePolyline(false);
+                map.setView([38.12268, -0.87933], 15);
+                return;
+            }
+            updateCustomRoutePolyline(true);
+        }
+
+        function clearCustomRouteLine() {
+            if (map && customRoutePolyline) {
+                map.removeLayer(customRoutePolyline);
+                customRoutePolyline = null;
+            }
+            if (map && routeOrderMarkers.length > 0) {
+                routeOrderMarkers.forEach(m => map.removeLayer(m));
+                routeOrderMarkers = [];
+            }
+        }
+
+        function addStopToCustomRoute(placeId, shouldCenterOnMap = true) {
+            const place = findPointById(placeId);
+            if (!place) {
+                setRouteFeedback('No se ha encontrado el lugar seleccionado.', true);
+                return;
+            }
+            state.mapOverlayVisible = true;
+
+            if (!state.customRoute.includes(placeId)) {
+                state.customRoute.push(placeId);
+            }
+
+            let activeSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+            if (!activeSaved) {
+                activeSaved = {
+                    id: `saved-custom-${Date.now()}`,
+                    sourceId: 'custom',
+                    title: 'Mi ruta guardada',
+                    subtitle: 'Ruta guardada en Rutas',
+                    stops: [...state.customRoute],
+                    updatedAt: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                };
+                state.savedRoutes.unshift(activeSaved);
+                state.activeSavedRouteId = activeSaved.id;
+            } else if (!activeSaved.stops.includes(placeId)) {
+                activeSaved.stops.push(placeId);
+                activeSaved.updatedAt = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            setRouteFeedback(`"${place.title}" guardada en "${activeSaved.title}" y marcada en el mapa.`);
+            persistAndSyncRoutes(shouldCenterOnMap);
+        }
+
+        function removeStopFromCustomRoute(index) {
+            if (index < 0 || index >= state.customRoute.length) return;
+            state.customRoute.splice(index, 1);
+            if (state.activeSavedRouteId) {
+                const activeSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+                if (activeSaved) {
+                    activeSaved.stops = [...state.customRoute];
+                }
+            }
+            setRouteFeedback('Parada eliminada de la ruta.');
+            persistAndSyncRoutes(state.customRoute.length > 0 && state.mapOverlayVisible);
+        }
+
+        function moveStopInCustomRoute(index, delta) {
+            const target = index + delta;
+            if (index < 0 || index >= state.customRoute.length) return;
+            if (target < 0 || target >= state.customRoute.length) return;
+            const temp = state.customRoute[index];
+            state.customRoute[index] = state.customRoute[target];
+            state.customRoute[target] = temp;
+            state.mapOverlayVisible = true;
+            if (state.activeSavedRouteId) {
+                const activeSaved = state.savedRoutes.find(r => r.id === state.activeSavedRouteId);
+                if (activeSaved) {
+                    activeSaved.stops = [...state.customRoute];
+                }
+            }
+            setRouteFeedback('Orden de paradas actualizado en el mapa.');
+            persistAndSyncRoutes(true);
+        }
+
+        function clearCustomRoute() {
+            state.customRoute = [];
+            setRouteFeedback('Trazado actual limpiado.');
+            persistAndSyncRoutes(false);
+        }
+
+        function renderCustomRouteBuilder() {
+            const catalog = document.getElementById('customRouteCatalog');
+            const listEl = document.getElementById('customRouteStopsList');
+            const countEl = document.getElementById('customRouteCount');
+
+            if (countEl) countEl.textContent = state.customRoute.length;
+
+            if (catalog) {
+                catalog.innerHTML = ALL_MAP_POINTS.map(point => {
+                    const targetSectionId =
+                        targetSectionId === 'gastronomia' ? 'gastronomia' :
+                        targetSectionId === 'cultura' ? 'cultura' :
+                        targetSectionId === 'naturaleza' ? 'naturaleza' :
+                        targetSectionId === 'barrios' ? 'barrios' : 'descubre';
+                    const targetLabel =
+                        targetSectionId === 'gastronomia' ? 'Ir a Gastronomía' :
+                        targetSectionId === 'cultura' ? 'Ir a Cultura y País' :
+                        targetSectionId === 'naturaleza' ? 'Ir a Naturaleza' :
+                        targetSectionId === 'barrios' ? 'Ir a Barrios' : 'Ir a Descubre';
+                    return `
+                        <button type="button" onclick="const sec = document.getElementById('${escapeHtmlAttr(targetSectionId)}'); if (sec) sec.scrollIntoView({ behavior: 'smooth' });" class="w-full p-3 rounded-xl bg-white dark:bg-earth-900 border border-cream-200 dark:border-earth-700 hover:border-terracotta-500 flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-sm truncate">${escapeHtmlAttr(point.title)}</div>
+                                <div class="text-[11px] text-earth-800/60 dark:text-cream-100/60">${escapeHtmlAttr(point.categoryLabel || point.category)}</div>
+                            </div>
+                            <span class="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-terracotta-500 text-white">
+                                ${escapeHtmlAttr(targetLabel)} →
+                            </span>
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            if (listEl) {
+                if (state.customRoute.length === 0) {
+                    listEl.innerHTML = `<p class="text-sm text-earth-800/60 dark:text-cream-100/60 py-8 text-center">No hay paradas seleccionadas todavía. Añade lugares desde la lista o carga una ruta temática.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = state.customRoute.map((id, idx) => {
+                    const point = findPointById(id);
+                    if (!point) return '';
+                    const isFirst = idx === 0;
+                    const isLast = idx === state.customRoute.length - 1;
+                    return `
+                        <div class="p-3 rounded-xl bg-cream-50 dark:bg-earth-800 border border-cream-200 dark:border-earth-700 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-6 h-6 rounded-full bg-olive-600 text-white text-xs font-bold inline-flex items-center justify-center shrink-0">${idx + 1}</span>
+                                <span class="font-medium text-sm truncate">${escapeHtmlAttr(point.title)}</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="moveStopInCustomRoute(${idx}, -1)" ${isFirst ? 'disabled' : ''} aria-label="Subir parada" class="w-7 h-7 rounded-lg bg-white dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs font-bold disabled:opacity-30">↑</button>
+                                <button type="button" onclick="moveStopInCustomRoute(${idx}, 1)" ${isLast ? 'disabled' : ''} aria-label="Bajar parada" class="w-7 h-7 rounded-lg bg-white dark:bg-earth-900 border border-cream-200 dark:border-earth-700 text-xs font-bold disabled:opacity-30">↓</button>
+                                <button type="button" onclick="removeStopFromCustomRoute(${idx})" aria-label="Eliminar parada" class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white text-xs font-bold transition-colors">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 8. GLOBAL SEARCH, THEME & INITIALIZATION
+        let currentPlaceFilter = 'all';
+
+        function setupSearch() {
+            const inputs = [document.getElementById('globalSearch'), document.getElementById('globalSearchMobile')].filter(Boolean);
+            const resultsBox = document.getElementById('searchResults');
+
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const q = input.value.trim().toLowerCase();
+                    if (!resultsBox || input.id !== 'globalSearch') return;
+                    if (!q) {
+                        resultsBox.classList.add('hidden');
+                        resultsBox.innerHTML = '';
+                        return;
+                    }
+                    const matches = [
+                        ...PLACES.map(p => ({ label: p.title, sub: p.categoryLabel || p.category, action: () => openPlaceModal(p.id) })),
+                        ...DISHES.filter(d => d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q)).map(d => ({
+                            label: d.name,
+                            sub: 'Gastronomía',
+                            action: () => { const el = document.getElementById('gastronomia'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+                        }))
+                    ].filter(item => item.label.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q));
+
+                    if (matches.length === 0) {
+                        resultsBox.innerHTML = `<div class="p-3 text-xs text-earth-800/60 dark:text-cream-100/60">Sin resultados para "${escapeHtmlAttr(q)}"</div>`;
+                    } else {
+                        resultsBox.innerHTML = matches.slice(0, 6).map((m, idx) => `
+                            <button type="button" data-sidx="${idx}" class="search-item-btn w-full text-left px-3 py-2 rounded-lg hover:bg-cream-100 dark:hover:bg-earth-900 text-xs flex items-center justify-between gap-2">
+                                <span class="font-semibold">${escapeHtmlAttr(m.label)}</span>
+                                <span class="text-terracotta-500">${escapeHtmlAttr(m.sub)}</span>
+                            </button>
+                        `).join('');
+                        resultsBox.querySelectorAll('.search-item-btn').forEach((btn, idx) => {
+                            btn.addEventListener('click', () => {
+                                matches[idx].action();
+                                resultsBox.classList.add('hidden');
+                            });
+                        });
+                    }
+                    resultsBox.classList.remove('hidden');
+                });
+            });
+        }
+
+        function setupThemeAndUI() {
+            const syncDarkIcons = () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                document.querySelectorAll('#themeToggle .dark\\:hidden').forEach(el => {
+                    el.style.display = isDark ? 'none' : '';
+                });
+                document.querySelectorAll('#themeToggle .dark\\:block').forEach(el => {
+                    el.style.display = isDark ? 'block' : 'none';
+                });
+            };
+
+            if (state.darkMode) {
+                document.documentElement.classList.add('dark');
+            }
+            syncDarkIcons();
+
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                const handleThemeToggle = (e) => {
+                    if (e) e.preventDefault();
+                    state.darkMode = !document.documentElement.classList.toggle('dark');
+                    syncDarkIcons();
+                    saveState();
+                };
+                themeToggle.addEventListener('click', handleThemeToggle);
+            }
+
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileBtn && mobileMenu) {
+                const setMobileMenuOpen = (open) => {
+                    mobileMenu.classList.toggle('hidden', !open);
+                    mobileMenu.style.display = open ? 'block' : 'none';
+                    mobileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                };
+
+                setMobileMenuOpen(false);
+
+                mobileBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isOpen = !mobileMenu.classList.contains('hidden');
+                    setMobileMenuOpen(!isOpen);
+                });
+
+                mobileMenu.querySelectorAll('a').forEach(a => {
+                    a.addEventListener('click', () => setMobileMenuOpen(false));
+                });
+
+                document.addEventListener('click', (e) => {
+                    const isOpen = !mobileMenu.classList.contains('hidden');
+                    if (isOpen && !mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+                        setMobileMenuOpen(false);
+                    }
+                });
+            }
+
+            document.querySelectorAll('#placeFilters .filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#placeFilters .filter-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-terracotta-500', 'text-white');
+                        b.classList.add('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    });
+                    btn.classList.add('active', 'bg-terracotta-500', 'text-white');
+                    btn.classList.remove('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    currentPlaceFilter = btn.dataset.cat;
+                    renderPlaces(currentPlaceFilter);
+                });
+            });
+
+            document.querySelectorAll('#gastroFilters .gfilter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#gastroFilters .gfilter-btn').forEach(b => {
+                        b.classList.remove('bg-terracotta-500', 'text-white');
+                        b.classList.add('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    });
+                    btn.classList.add('bg-terracotta-500', 'text-white');
+                    btn.classList.remove('bg-white', 'dark:bg-earth-800', 'text-earth-800', 'dark:text-cream-100');
+                    renderDishes(btn.dataset.gcat);
+                });
+            });
+
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const placeModal = document.getElementById('placeModal');
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closePlaceModal);
+            if (placeModal) {
+                placeModal.addEventListener('click', e => {
+                    if (e.target === placeModal) closePlaceModal();
+                });
+            }
+
+            const yearEl = document.getElementById('year');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            if (scrollToTopBtn) {
+                const toggleScrollBtn = () => {
+                    const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+                    const show = currentScroll > 300;
+                    scrollToTopBtn.classList.toggle('opacity-0', !show);
+                    scrollToTopBtn.classList.toggle('pointer-events-none', !show);
+                    scrollToTopBtn.classList.toggle('translate-y-3', !show);
+                    scrollToTopBtn.classList.toggle('opacity-100', show);
+                    scrollToTopBtn.classList.toggle('translate-y-0', show);
+                };
+
+                scrollToTopBtn.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                window.addEventListener('scroll', toggleScrollBtn, { passive: true });
+                toggleScrollBtn();
+            }
+        }
+
+        window.addEventListener('load', () => {
+            // Iniciar rutas desmarcadas por defecto en cada carga limpia de la guía
+            state.customRoute = [];
+            state.savedRoutes = [];
+            state.activeSavedRouteId = null;
+            state.mapOverlayVisible = false;
+            saveState();
+
+            setupThemeAndUI();
+            setupSearch();
+            updateBadges();
+            updateSavedRoutesBadge();
+            renderPlaces('all');
+            renderDishes('all');
+            renderGastroTrivia();
+            renderTraditionsAndTimeline();
+            renderRoutesAndPlanner();
+            renderThemedRoutes();
+            renderCustomRouteBuilder();
+            renderSavedRoutesSection();
+            renderPassport();
+            renderFavorites();
+            renderQuiz();
+            initMap();
+            if (state.mapOverlayVisible && state.customRoute.length > 0) {
+                updateCustomRoutePolyline(false);
+            }
+        });
+    </script>
+</body>
+</html>
